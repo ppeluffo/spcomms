@@ -11,9 +11,9 @@ Los frames de datos quedan en otra lista L_DATOS
 '''
 import redis
 import pickle
-from FUNCAUX import spc_stats as stats
-from FUNCAUX.spc_config import Config
-from FUNCAUX.spc_log import log
+from FUNCAUX.UTILS import spc_stats as stats
+from FUNCAUX.UTILS.spc_config import Config
+from FUNCAUX.UTILS.spc_log import log
 
 
 class BD_REDIS:
@@ -74,7 +74,7 @@ class BD_REDIS:
             self.handle.hset(dlgid, 'VALID', "True")            # releer de BD persistente y recrear el registro
         return True
 
-    def save_statistics(self, pkdict ):
+    def save_statistics(self, pkdict):
         '''
         Guarda un diccionario de estadisticas de procesamiento del frame en una lista de REDIS
         '''
@@ -109,8 +109,8 @@ class BD_REDIS:
                 #log(module=__name__, function='enqueue_data_record', level='ERROR', msg='REDIS ENQUEUE OK {0}{1}'.format(Config['REDIS']['host'], pkdict ))
                 return True
         except Exception as err_var:
-            log(module=__name__, function='save_data_record',level='ERROR', msg='{0}: Init ERROR !!'.format(queue_name))
-            log(module=__name__, function='save_data_record',level='ERROR', msg='{0}: EXCEPTION={1}'.format(queue_name, err_var))
+            log(module=__name__, function='save_data_record', level='ERROR', msg='{0}: Init ERROR !!'.format(queue_name))
+            log(module=__name__, function='save_data_record', level='ERROR', msg='{0}: EXCEPTION={1}'.format(queue_name, err_var))
             stats.inc_count_errors()
         return False
 
@@ -150,7 +150,7 @@ class BD_REDIS:
                 l1 = modbus_line.replace('][', ';')
                 l1 = l1.replace('[', '')
                 l1 = l1.replace(']', '')
-                l2 = [ (a, c) for (a, b, c) in [x.split(',') for x in l1.split(';')]]
+                l2 = [ (a, c) for (a, b, c) in [x.split(',') for x in l1.split(';')] ]
                 for i, j in l2:
                     response += '{0}:{1};'.format(i, j)
                 # Elimino todos los caracteres vacios que pudiesen haber...
@@ -221,14 +221,14 @@ class BD_REDIS:
             return False
         lines = []
         try:
-            lines = self.handle.lpop(queue_name, size )
+            lines = self.handle.lpop(queue_name, size)
         except Exception as err_var:
             log(module=__name__, function='lpop_lqueue', level='ERROR', msg='ERROR Queue={0} !!'.format(queue_name))
             log(module=__name__, function='lpop_lqueue', level='ERROR', msg='Queue={0}, EXCEPTION={1}'.format(queue_name, err_var))
             stats.inc_count_errors()
         return lines
 
-    def save_line(self, dlgid, line ):
+    def save_line(self, dlgid, line):
         # Guardo la ultima linea en la redis porque la uso para los automatismos
         if not self.connect():
             log(module=__name__, function='save_line', level='ERROR', dlgid=dlgid, msg='REDIS NOT CONNECTED')
@@ -300,7 +300,7 @@ class BD_REDIS:
             stats.inc_count_errors()
             return False
 
-    def exist_or_create_entry(self,dlgid):
+    def exist_or_create_entry(self, dlgid):
         '''
         Verifica que exista la entrada en Redis.
         Si no existe la crea.

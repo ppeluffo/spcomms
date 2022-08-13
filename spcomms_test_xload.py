@@ -12,8 +12,8 @@ from multiprocessing import Lock, Pool
 import argparse
 import signal
 import os
-from FUNCAUX.spc_sendframes import SENDFRAMES
-from FUNCAUX.spc_log import config_logger
+from FUNCAUX.UTILS.spc_sendframes import SENDFRAMES
+from FUNCAUX.UTILS.spc_log import config_logger
 
 POOL_PROCESOS = os.cpu_count()
 MAX_FRAMES_X_MIN_X_PROCESO = 200

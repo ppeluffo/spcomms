@@ -7,8 +7,8 @@ Acepta argumentos ( ver spyplc_test_xframe.py -h )
 
 import time
 import argparse
-from FUNCAUX.spc_sendframes import SENDFRAMES
-from FUNCAUX.spc_log import config_logger
+from FUNCAUX.UTILS.spc_sendframes import SENDFRAMES
+from FUNCAUX.UTILS.spc_log import config_logger
 
 if __name__ == '__main__':
 
@@ -23,12 +23,14 @@ if __name__ == '__main__':
                         help = 'ID del datalogger a usar (PABLO)')
     parser.add_argument('-f','--fw', dest='fw_ver', action='store', default = '4.0.4b',
                         help = 'Version del firmware a usar en los frames (4.0.4b)')
-    parser.add_argument('-i','--script', dest='script', action='store', default = 'spyplc.py',
+    parser.add_argument('-i','--script', dest='script', action='store', default = 'spcomms.py',
                         help = 'Nombre del script a usar (spyplc.py)')
-    parser.add_argument('-t','--path', dest='path', action='store', default = 'AUTOM',
-                        help = 'Nombre del directorio donde se encuentra el script a usar (/AUTOM)')
+    parser.add_argument('-t','--path', dest='path', action='store', default = 'COMMS',
+                        help = 'Nombre del directorio donde se encuentra el script a usar (/COMMS)')
     parser.add_argument('-l','--payload', dest='payload', action='store', default = 'REAL',
                         help = 'Tipo de payload a usar: real / random (real)')
+    parser.add_argument('-y', '--frame_type', dest='type', action='store', default='SPX',
+                        help='Tipo de frame a enviar: (SPX)|SP5K|PLC|PLCPAY')
     parser.add_argument('-v','--verbose', dest='verbose', action='count', default = 0,
                         help = 'Verbose 0/1: (0)')
 
@@ -44,6 +46,7 @@ if __name__ == '__main__':
     sendframes.set_fw_ver(d_args['fw_ver'])
     sendframes.set_script(d_args['script'])
     sendframes.set_path(d_args['path'])
+    sendframes.set_type(d_args['type'])
     if d_args['verbose'] == 0:
         sendframes.set_verbose(False)
     else:

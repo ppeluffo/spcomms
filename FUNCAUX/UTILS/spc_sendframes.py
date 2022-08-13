@@ -7,7 +7,7 @@ Lee las magnitudes definidas para el datalogger de modo que los frames no den er
 
 import numpy as np
 import urllib.request
-from FUNCAUX.spc_bd_gda import BD_GDA
+from FUNCAUX.BD.spc_bd_gda import BD_GDA
 
 
 class SENDFRAMES:
@@ -24,6 +24,11 @@ class SENDFRAMES:
         self.verbose = True
         self.payload_template = ''
         self.payload = ''
+        self.type = ''
+        self.frame_list = None
+
+    def set_type(self, type):
+        self.type = type
 
     def set_dlgid(self,dlgid):
         self.dlgid = dlgid
@@ -55,6 +60,7 @@ class SENDFRAMES:
         print('PORT = {}'.format(self.port))
         print('FW_VER: {}'.format(self.fw_ver))
         print('SCRIPT: {}'.format(self.script))
+        print('TYPE: {}'.format(self.type))
         print('VERBOSE: {}'.format(self.verbose))
 
     def prepare_random_payload(self):
@@ -86,6 +92,7 @@ class SENDFRAMES:
         return self.payload_template
 
     def fill_payload(self):
+        # EL payload es un template. Asigno los valores de las magnitudes.
         self.payload = self.payload_template
         # Rellena el template con valores aleatorios.
         while self.payload.find('REPLACE_VAL') > 0:
@@ -98,7 +105,7 @@ class SENDFRAMES:
             print('\nFrame:')
 
         # Header
-        self.url = 'http://{0}:{1}/cgi-bin/{2}/{3}?ID:{4};VER:{5};'.format(self.server, self.port, self.path, self.script, self.dlgid, self.fw_ver)
+        self.url = 'http://{0}:{1}/cgi-bin/{2}/{3}?ID:{4};TYPE:{5};VER:{6};'.format(self.server, self.port, self.path, self.script, self.dlgid, self.type, self.fw_ver)
         #
         # Calculo los valores instantaneos y transmito
         self.fill_payload()

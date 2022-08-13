@@ -58,9 +58,9 @@ Host: www.spymovil.com
 
 import os
 import sys
-from FUNCAUX.spc_log import *
-from FUNCAUX.spc_config import Config
-from FUNCAUX import spc_stats as stats
+from FUNCAUX.UTILS.spc_log import *
+from FUNCAUX.UTILS.spc_config import Config
+from FUNCAUX.UTILS import spc_stats as stats
 
 version = '1.0.0 @ 2022-08-06'
 # -----------------------------------------------------------------------------
@@ -125,22 +125,22 @@ if __name__ == '__main__':
     dlgid = None
     response = None
     if device_type == 'PLC':
-        from FUNCAUX.spc_frames4plc import PLC_frame
+        from FUNCAUX.FRAMES.spc_frames4plc import PLC_frame
         plc_frame = PLC_frame(d)
         dlgid, response = plc_frame.process()
 
     if device_type == 'PLCPAY':
-        from FUNCAUX.spc_frames4plcpay import PLCPAY_frame
+        from FUNCAUX.FRAMES.spc_frames4plcpay import PLCPAY_frame
         plcpay_frame = PLCPAY_frame(d)
         dlgid, response = plcpay_frame.process()
 
     elif device_type == 'SPX':
-        from FUNCAUX.spc_frames4spx import SPX_frame
+        from FUNCAUX.FRAMES.spc_frames4spx import SPX_frame
         spx_frame = SPX_frame(d)
         dlgid, response = spx_frame.process()
 
     elif device_type == 'SP5K':
-        from FUNCAUX.spc_frames4sp5k import SP5K_frame
+        from FUNCAUX.FRAMES.spc_frames4sp5k import SP5K_frame
         sp5K_frame = SP5K_frame(d)
         dlgid, response = sp5K_frame.process()
 

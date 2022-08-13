@@ -1,10 +1,14 @@
 #!/opt/anaconda3/envs/mlearn/bin/python3
 #!/usr/bin/python3 -u
 
+'''
+Funciones de uso general.
+'''
+
 # Dependencias
 import redis
-from FUNCAUX.spc_config import Config
-from FUNCAUX.spc_log import log
+from FUNCAUX.UTILS.spc_config import Config
+from FUNCAUX.UTILS.spc_log import log
 
 
 def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
@@ -19,6 +23,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         EX:
             mbusWrite(self.DLGID_CTRL,'2097','interger',105)
     '''
+
     # Definición de ventanas de buffers de transmisión
     windowsFirmNuevo = 7
     windowsFirmViejo = 3
@@ -238,7 +243,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         else:
             return False
 
-    def IsRedisConnected(host='192.168.0.6', port='6379', db='0'):
+    def IsRedisConnected(host='192.168.0.6', port=6379, db=0):
         '''
             se conecta con la RedisDb y devuelve el objeto rh asi como el estado de la conexion
         '''
@@ -347,7 +352,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         if not delete:
             if rh.hexists(dlgid, MBTAG) == 1:
                 rdMbtag = int(rh.hget(dlgid, MBTAG).decode())
-                if rdMbtag == 50:
+                if (rdMbtag == 50):
                     rh.hset(dlgid, MBTAG, 1)
                 else:
                     rh.hset(dlgid, MBTAG, rdMbtag + 1)
@@ -360,7 +365,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
     def IsOkRx():
         rdMbtag = rh.hget(dlgid, MBTAG).decode() if rh.hexists(dlgid, MBTAG) == 1 else '-1'
 
-        if fdbk == 'ACK' and rdMbtag == mbTag:
+        if (fdbk == 'ACK' and rdMbtag == mbTag):
             return True 
         else:
             return False
@@ -369,8 +374,6 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         rh.hset(dlgid, key, 'NUL')
 
     # main program
-    #log(module=__name__, function='mbusWrite', level='ALERT', msg='(dlgid={0}, register={1}, dataType={2}, value={3}'.format(dlgid, register, dataType, value))
-
     redisConnection,rh = IsRedisConnected(host=Config['REDIS']['host'], port=Config['REDIS']['port'], db=Config['REDIS']['db'])
     # redisConnection, rh = IsRedisConnected()
     if redisConnection:
@@ -679,17 +682,6 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
 
                         writeFrameIn(Frame2SaveRegFirmwOld, 'lastMODBUS')     
 
-def u_calcular_ckechsum(line):
-    '''
-     Cambiamos la forma de calcular el checksum porque el xor
-     si ponemos 2 veces el miso caracter no lo detecta !!!!
-     '''
-    log(module=__name__, function='u_calcular_ckechsum', dlgid='ERROR', msg='CKS line [{0}]'.format(line))
-    cks = 0
-    for c in line:
-        #cks ^= ord(c)
-        cks = (cks + ord(c)) % 256
-    return cks
 
         
 

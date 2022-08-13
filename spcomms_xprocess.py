@@ -13,12 +13,12 @@ Si hay datos la sacan y procesan.
 from multiprocessing import Process
 import time
 import signal
-from FUNCAUX.spc_log import config_logger, log
-from FUNCAUX.spc_config import Config
-from FUNCAUX.spc_processPLC import ProcessPLC
-from FUNCAUX.spc_processPLCPAY import ProcessPLCPAY
-from FUNCAUX.spc_processSPX import ProcessSPX
-from FUNCAUX.spc_processSP5K import ProcessSP5K
+from FUNCAUX.UTILS.spc_log import config_logger, log
+from FUNCAUX.UTILS.spc_config import Config
+from FUNCAUX.PROCESS.spc_processPLC import ProcessPLC
+from FUNCAUX.PROCESS.spc_processPLCPAY import ProcessPLCPAY
+from FUNCAUX.PROCESS.spc_processSPX import ProcessSPX
+from FUNCAUX.PROCESS.spc_processSP5K import ProcessSP5K
 
 MAXPOOLSIZE_SPX=2
 MAXPOOLSIZE_SP5K=2
@@ -32,24 +32,31 @@ DATABOUNDLESIZE=50
 def process_child(child_type='PLC'):
 
     if child_type == 'PLC':
-        p = ProcessPLC('LQ_PLCDATA')
+        p = ProcessPLC( 'LQ_PLCDATA', 'PLC')
     elif child_type == 'PLCPAY':
-        p = ProcessPLCPAY('LQ_PLCPAYDATA')
+        p = ProcessPLCPAY('LQ_PLCPAYDATA', 'PLCPAY')
     elif child_type == 'SPX':
-        p = ProcessSPX('LQ_SPXDATA')
+        p = ProcessSPX('LQ_SPXDATA', 'SPX')
     elif child_type == 'SP5K':
-        p = ProcessSP5K('LQ_SP5KDATA')
+        p = ProcessSP5K('LQ_SP5KDATA', 'SP5K')
+    else:
+        log(module=__name__, function='process_child', level='ERROR', msg='ERROR: child_type = {0}'.format(child_type))
+        return
     #
     p.process_queue()
     return
 
 
-def process_master_start_child(plist, child_type='PLC', poolsize=2):
+def process_master_start_child(plist, child_type=None, poolsize=2):
+    if child_type is None:
+        log(module=__name__, function='process_master_start_child', level='ERROR', msg='ERROR: child_type = {0}'.format(child_type))
+        return
+
     while len(plist) < poolsize:
         p = Process(target=process_child, args=(child_type,))
         p.start()
         plist.append(p)
-        log(module=__name__, function='process_master_start_child', level='INFO', msg='{0}: process_master: Agrego nuevo proceso'.format(child_type))
+        log(module=__name__, function='process_master_start_child', level='INFO', msg='Agrego nuevo proceso child para {0}'.format(child_type))
 
 
 def process_master():
@@ -63,10 +70,12 @@ def process_master():
     plist_sp5k = []
     plist_plc = []
     plist_plcpay = []
-    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay]
-    child_types = ['SPX','SP5K','PLC','PLCPAY']
-    process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
-
+    #process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay]
+    #child_types = ['SPX','SP5K','PLC','PLCPAY']
+    #process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
+    process_list = [plist_plc, plist_plcpay ]
+    child_types = ['PLC','PLCPAY']
+    process_poolsizes = [ MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
     #logger.info(plist)
     # Creo todos los procesos child.
     for plist, child_type, poolsize in zip( process_list, child_types, process_poolsizes ):

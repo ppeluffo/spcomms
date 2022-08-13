@@ -10,7 +10,7 @@ Created on Wed Aug 14 09:19:01 2019
 import logging
 import logging.handlers
 from datetime import datetime
-from FUNCAUX.spc_config import Config
+from FUNCAUX.UTILS.spc_config import Config
 
 # Variable global que indica donde logueo.
 # La configuro al inciar los programas

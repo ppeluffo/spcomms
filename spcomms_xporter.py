@@ -82,7 +82,7 @@ import time
 import prometheus_client as prom
 import pickle
 import numpy as np
-from FUNCAUX.spc_config import Config
+from FUNCAUX.UTILS.spc_config import Config
 
 
 class SPYSTATS:

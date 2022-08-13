@@ -1,7 +1,7 @@
 #!/opt/anaconda3/envs/mlearn/bin/python3
 
-import sys
-from FUNCAUX.spc_frames4plc import PLC_frame
+import os
+from FUNCAUX.FRAMES.spc_frames4plc import PLC_frame
 # ------------------------------------------------------------------------------
 
 class PLCPAY_frame(PLC_frame):
@@ -10,10 +10,9 @@ class PLCPAY_frame(PLC_frame):
 
     def process_automatismos_paysandu(self):
         # Exception 001: Atencion a PLC de paysandu
-        sys.path.insert(1, '/datos/cgi-bin/spx/AUTOMATISMOS')
+        CBK = '/datos/cgi-bin/spx/AUTOMATISMOS/serv_APP_selection.py'
         try:
-            import serv_APP_selection
-            serv_APP_selection.main(self.dlgid)
+            os.system('{0} {1}'.format(CBK, self.dlgid))
         except:
             self.response="ERROR LOAD MODULE serv_APP_selection"
         return

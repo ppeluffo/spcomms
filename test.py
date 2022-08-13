@@ -2,6 +2,7 @@
 
 import os
 
+
 if __name__ == '__main__':
     query_string = os.environ.get('QUERY_STRING')
     print('Content-type: text/html\n\n', end='')

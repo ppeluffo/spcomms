@@ -2,9 +2,9 @@
 
 import datetime as dt
 import sys
-from FUNCAUX import spc_stats as stats
-from FUNCAUX.spc_log import log
-from FUNCAUX.spc_bd_redis import BD_REDIS
+from FUNCAUX.UTILS import spc_stats as stats
+from FUNCAUX.UTILS.spc_log import log
+from FUNCAUX.BD.spc_bd_redis import BD_REDIS
 
 # ------------------------------------------------------------------------------
 

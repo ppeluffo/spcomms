@@ -1,8 +1,8 @@
 #!/opt/anaconda3/envs/mlearn/bin/python3
 
 import datetime as dt
-from FUNCAUX.spc_mbus_write import mbusWrite
-from FUNCAUX.spc_framesBase import BASE_frame
+from FUNCAUX.UTILS.spc_mbus_write import mbusWrite
+from FUNCAUX.FRAMES.spc_framesBase import BASE_frame
 # ------------------------------------------------------------------------------
 
 
@@ -18,9 +18,9 @@ class PLC_frame(BASE_frame):
         DATE:220802;TIME:122441;PA:3.21;PB:1.34;H:4.56;bt:10.11
         '''
         rcvd_line = d.get('QUERY_STRING', "ERROR Line")
-        l = rcvd_line.split(d['VER'])
+        parts = rcvd_line.split(d['VER'])
         try:
-            payload = l[1]  # ';PA:3.21;PB:1.34;H:4.56;bt:10.11'
+            payload = parts[1]  # ';PA:3.21;PB:1.34;H:4.56;bt:10.11'
         except:
             return "ERROR LINE"
 

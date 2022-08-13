@@ -4,9 +4,9 @@
 import numpy as np
 from sqlalchemy import create_engine
 from sqlalchemy import text
-from FUNCAUX import spc_stats as stats
-from FUNCAUX.spc_config import Config
-from FUNCAUX.spc_log import log
+from FUNCAUX.UTILS import spc_stats as stats
+from FUNCAUX.UTILS.spc_config import Config
+from FUNCAUX.UTILS.spc_log import log
 
 
 class BD_GDA:
@@ -48,6 +48,8 @@ class BD_GDA:
 
     def exec_sql(self, dlgid, sql):
         # Ejecuta la orden sql.
+        # Retorna un resultProxy o None
+
         if not self.connect():
             log(module=__name__, function='exec_sql', level='ERROR', dlgid=dlgid,
                 msg='ERROR: No hay conexion a BD. Exit !!')
@@ -75,12 +77,15 @@ class BD_GDA:
             else:
                 log(module=__name__, function='exec_sql', level='ERROR', dlgid=dlgid, msg='ERROR: {0}, EXCEPTION {1}'.format(dlgid, err_var))
             '''
+            return None
         return rp
 
     def read_dlg_insert_data(self, data):
+        # Retorna un diccinario o None
+
+        log(module=__name__, function='read_dlg_insert_data', level='INFO', msg='Start')
 
         config = {}
-
         txdlg = ""
         ldlg = []
         for d in data:
@@ -96,7 +101,16 @@ class BD_GDA:
                 """.format(txdlg=txdlg)
 
         rp = self.exec_sql(txdlg, sql)
-        results = rp.fetchall()
+        try:
+            results = rp.fetchall()
+        except AttributeError as ax:
+            log(module=__name__, function='read_dlg_insert_data', level='ERROR', msg='AttributeError fetchall: {0}'.format(ax))
+            log(module=__name__, function='read_dlg_insert_data', level='ERROR', msg='End FAIL')
+            return None
+        except Exception as ex:  # good idea to be prepared to handle various fails
+            log(module=__name__, function='read_dlg_insert_data', level='ERROR', msg='Exception fetchall: {0}'.format(ex))
+            log(module=__name__, function='read_dlg_insert_data', level='ERROR', msg='End FAIL')
+            return None
 
         log(module=__name__, function='read_dlg_insert_data', dlgid=txdlg, level='SELECT', msg='Reading conf from GDA.')
         for row in results:
@@ -105,24 +119,33 @@ class BD_GDA:
                 config[dlgid] = {}
             config[dlgid]['ubicacion_id'] = ubicacion_id
             config[dlgid][nombre] = medida_id
-
+        #
+        log(module=__name__, function='read_dlg_insert_data', level='INFO', msg='End OK')
         return config
 
     def insert_dlg_raw(self, data):
+        # Retorna un resultProxy o None
         sql = """INSERT INTO dlg_raws (dlgid,fechasys, tipo, rxstr) VALUES """
         for dd in data:
             dlgid = dd['dlgid']
             d = dd['data']
 
-            # Inserta la linea tal cual se recibio.
+            # Inserta la linea tal cual se recibio.( recién aqui tengo el dlgid !!!)
             log(module=__name__, function='insert_dlg_raw', level='SELECT', dlgid=dlgid, msg='Start')
 
             # Inserto frame en la tabla de DATA.
             sql += """( '{0}', NOW(),'DATA','{1}'),""".format(dlgid, d.get('RCVD', 'EMPTY_LINE'))
         sql = sql[:-1] + ' ON CONFLICT DO NOTHING'
-        return self.exec_sql(dlgid, sql)
+        result = self.exec_sql(dlgid, sql)
+        if result is None:
+            log(module=__name__, function='insert_dlg_raw', level='ERROR', dlgid=dlgid, msg='End FAIL')
+            return False
+        else:
+            log(module=__name__, function='insert_dlg_raw', level='SELECT', dlgid=dlgid, msg='End OK')
+            return True
 
     def insert_dlg_data(self, data):
+        # Retorna un resultProxy o None
         sql = """INSERT INTO dlg_data (dlgid,fechadata, tag, value) VALUES """
 
         for dd in data:
@@ -141,15 +164,22 @@ class BD_GDA:
                     try:
                         fvalue = float(value)
                     except:
-                        favalue = np.NaN
+                        fvalue = np.NaN
 
                 sql += """('{0}',NOW(),'{1}','{2}'),""".format(dlgid, key, fvalue)
 
         sql = sql[:-1] + ' ON CONFLICT DO NOTHING'
-        self.exec_sql(dlgid, sql)
-        return
+        #
+        result = self.exec_sql(dlgid, sql)
+        if result is None:
+            log(module=__name__, function='insert_dlg_data', level='ERROR', dlgid=dlgid, msg='End FAIL.')
+            return False
+        else:
+            log(module=__name__, function='insert_dlg_data', level='SELECT', dlgid=dlgid, msg='End OK')
+            return True
 
     def insert_spx_datos(self, data, allConfigs):
+        # Retorna un resultProxy o None
         sql = """INSERT INTO spx_datos (fechasys, fechadata, valor, medida_id, ubicacion_id ) VALUES """
         for dd in data:
             dlgid = dd['dlgid']
@@ -180,10 +210,16 @@ class BD_GDA:
                 log(module=__name__, function='insert_spx_datos', level='ERROR', dlgid=dlgid, msg='Not exist config')
 
         sql = sql[:-1] + ' ON CONFLICT DO NOTHING'
-        self.exec_sql(dlgid, sql)
-        return
+        result = self.exec_sql(dlgid, sql)
+        if result is None:
+            log(module=__name__, function='insert_spx_datos', level='ERROR', dlgid=dlgid, msg='End FAIL.')
+            return False
+        else:
+            log(module=__name__, function='insert_spx_datos', level='SELECT', dlgid=dlgid, msg='End OK')
+            return True
 
     def insert_spx_datos_online(self, data, allConfigs):
+        # Retorna un resultProxy o None
         sql = "INSERT INTO spx_online (fechasys, fechadata, valor, medida_id, ubicacion_id ) VALUES "
         for dd in data:
             dlgid = dd['dlgid']
@@ -216,9 +252,13 @@ class BD_GDA:
                 log(module=__name__, function='insert_spx_datos', level='ERROR', dlgid=dlgid, msg='Not exist config')
 
         sql = sql[:-1] + ' ON CONFLICT DO NOTHING'
-        self.exec_sql(dlgid, sql)
-        self.exec_sql(dlgid, sql)
-        return
+        result = self.exec_sql(dlgid, sql)
+        if result is None:
+            log(module=__name__, function='insert_spx_datos_online', level='ERROR', dlgid=dlgid, msg='End FAIL.')
+            return False
+        else:
+            log(module=__name__, function='insert_spx_datos_online', level='SELECT', dlgid=dlgid, msg='End OK')
+            return True
 
     def read_dlg_conf(self, dlgid):
         '''
@@ -246,7 +286,15 @@ class BD_GDA:
                     AND spx_unidades.dlgid = '{}'""".format(dlgid)
 
         rp = self.exec_sql(dlgid, sql)
-        results = rp.fetchall()
+        try:
+            results = rp.fetchall()
+        except AttributeError as ax:
+            log(module=__name__, function='read_dlg_conf', level='ERROR', msg='AttributeError fetchall: {0}'.format(ax))
+            return None
+        except Exception as ex:  # good idea to be prepared to handle various fails
+            log(module=__name__, function='read_dlg_conf', level='ERROR', msg='Exception fetchall: {0}'.format(ex))
+            return None
+
         d = {}
         log(module=__name__, function='read_dlg_conf', dlgid=dlgid, level='SELECT', msg='Reading conf from GDA.')
         for row in results:
@@ -265,6 +313,7 @@ class BD_GDA:
     def get_d_reenvios(self, dlgid):
         '''
         Lee la configuracion de los reenvios.
+        Retorna un diccionario o None
         '''
         log(module=__name__, function='get_d_reenvios', level='SELECT', dlgid=dlgid, msg='start')
 

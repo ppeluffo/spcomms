@@ -1,6 +1,6 @@
 #!/opt/anaconda3/envs/mlearn/bin/python3
 
-from FUNCAUX.spc_framesBase import BASE_frame
+from FUNCAUX.FRAMES.spc_framesBase import BASE_frame
 # ------------------------------------------------------------------------------
 
 class SP5K_frame(BASE_frame):
