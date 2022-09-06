@@ -21,7 +21,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
     '''
     # Definición de ventanas de buffers de transmisión
     windowsFirmNuevo = 7
-    windowsFirmViejo = 3
+    windowsFirmViejo = 15       # es el tamano del buffer que se puede llegar a transmitir hacia el PLC
 
     # parametros usados en el firmware nuevo
     MbusSlave = 2
@@ -238,7 +238,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         else:
             return False
 
-    def IsRedisConnected(host='192.168.0.6', port=6379, db=0):
+    def IsRedisConnected(host='192.168.0.6', port='6379', db='0'):
         '''
             se conecta con la RedisDb y devuelve el objeto rh asi como el estado de la conexion
         '''
@@ -347,7 +347,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         if not delete:
             if rh.hexists(dlgid, MBTAG) == 1:
                 rdMbtag = int(rh.hget(dlgid, MBTAG).decode())
-                if rdMbtag == 50:
+                if (rdMbtag == 50):
                     rh.hset(dlgid, MBTAG, 1)
                 else:
                     rh.hset(dlgid, MBTAG, rdMbtag + 1)
@@ -360,7 +360,7 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
     def IsOkRx():
         rdMbtag = rh.hget(dlgid, MBTAG).decode() if rh.hexists(dlgid, MBTAG) == 1 else '-1'
 
-        if fdbk == 'ACK' and rdMbtag == mbTag:
+        if (fdbk == 'ACK' and rdMbtag == mbTag):
             return True 
         else:
             return False
@@ -369,10 +369,12 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
         rh.hset(dlgid, key, 'NUL')
 
     # main program
-    #log(module=__name__, function='mbusWrite', level='ALERT', msg='(dlgid={0}, register={1}, dataType={2}, value={3}'.format(dlgid, register, dataType, value))
+    try:
+        from spy_config import Config
+        redisConnection,rh = IsRedisConnected(host=Config['REDIS']['host'], port=Config['REDIS']['port'], db=Config['REDIS']['db'])
+    except:
+        redisConnection, rh = IsRedisConnected()
 
-    redisConnection,rh = IsRedisConnected(host=Config['REDIS']['host'], port=Config['REDIS']['port'], db=Config['REDIS']['db'])
-    # redisConnection, rh = IsRedisConnected()
     if redisConnection:
         if register:
             # para firmwares nuevos
@@ -514,6 +516,8 @@ def mbusWrite(dlgid='', register='', dataType='', value='', fdbk='', mbTag=''):
             if IsExist('MODBUS'):
 
                 if IsNull('MODBUS'):
+                    print('es nulooooo')
+
 
                     if IsExisting('lastMODBUS'):
 

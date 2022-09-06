@@ -157,7 +157,7 @@ class BD_GDA:
 
             # Inserto frame en la tabla de DATA.
             for key in d:
-                if key in ['ID', 'RCVD', 'VER']:
+                if key in ['ID', 'TYPE', 'RCVD', 'VER', 'PAYLOAD']:
                     continue
                 value = d.get(key, 'None')
                 if value != 'None':
@@ -189,7 +189,7 @@ class BD_GDA:
             log(module=__name__, function='insert_spx_datos', level='SELECT', dlgid=dlgid, msg='Start')
             if dlgid in allConfigs:
                 for key in d:
-                    if key in ['ID', 'RCVD', 'VER']:
+                    if key in ['ID', 'TYPE', 'RCVD', 'VER', 'PAYLOAD']:
                         continue
                     value = d.get(key, 'None')
                     if value != 'None':
@@ -229,7 +229,7 @@ class BD_GDA:
             log(module=__name__, function='insert_spx_datos_online', level='SELECT', dlgid=dlgid, msg='Start')
             if dlgid in allConfigs:
                 for key in d:
-                    if key in ['ID', 'RCVD', 'VER']:
+                    if key in ['ID', 'TYPE', 'RCVD', 'VER', 'PAYLOAD']:
                         continue
                     value = d.get(key, 'None')
                     if value != 'None':

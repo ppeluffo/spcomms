@@ -1,5 +1,6 @@
-#!/opt/anaconda3/envs/mlearn/bin/python3
 #!/usr/bin/python3 -u
+#!/opt/anaconda3/envs/mlearn/bin/python3
+
 '''
 Version 2.0 @ 2022-08-02:
 Ulises modifica para que se haga una insercion sola con todos los datos.
@@ -19,11 +20,13 @@ from FUNCAUX.PROCESS.spc_processPLC import ProcessPLC
 from FUNCAUX.PROCESS.spc_processPLCPAY import ProcessPLCPAY
 from FUNCAUX.PROCESS.spc_processSPX import ProcessSPX
 from FUNCAUX.PROCESS.spc_processSP5K import ProcessSP5K
+from FUNCAUX.PROCESS.spc_processOCEANUS import ProcessOCEANUS
 
 MAXPOOLSIZE_SPX=2
 MAXPOOLSIZE_SP5K=2
 MAXPOOLSIZE_PLC=2
 MAXPOOLSIZE_PLCPAY=2
+MAXPOOLSIZE_OCEANUS=2
 
 DATABOUNDLESIZE=50
 
@@ -39,6 +42,8 @@ def process_child(child_type='PLC'):
         p = ProcessSPX('LQ_SPXDATA', 'SPX')
     elif child_type == 'SP5K':
         p = ProcessSP5K('LQ_SP5KDATA', 'SP5K')
+    elif child_type == 'OCEANUS':
+        p = ProcessOCEANUS('LQ_OCEANUSDATA', 'OCEANUS')
     else:
         log(module=__name__, function='process_child', level='ERROR', msg='ERROR: child_type = {0}'.format(child_type))
         return
@@ -74,8 +79,8 @@ def process_master():
     #child_types = ['SPX','SP5K','PLC','PLCPAY']
     #process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
     process_list = [plist_plc, plist_plcpay ]
-    child_types = ['PLC','PLCPAY']
-    process_poolsizes = [ MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
+    child_types = ['PLC','PLCPAY','OCEANUS']
+    process_poolsizes = [ MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS ]
     #logger.info(plist)
     # Creo todos los procesos child.
     for plist, child_type, poolsize in zip( process_list, child_types, process_poolsizes ):

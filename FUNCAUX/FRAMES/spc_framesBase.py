@@ -47,7 +47,15 @@ class BASE_frame:
         #
         # Guardo el frame el Redis
         self.rh = BD_REDIS()
-
+        #
+        # Parseo ahora las variables que al ser un GET vinieron en el query_string
+        try:
+            dp = {k: v for (k, v) in [x.split(':') for x in self.d['PAYLOAD'].split(';')]}
+        except:
+            stats.inc_count_errors()
+            log(module=__name__, function='process', level='ERROR', msg='DECODE ERROR: QS={0}'.format(self.d['QUERY_STRING']))
+        self.d.update(dp)
+        #
         # Encolo: cada tipo tiene una cola distinta
         device_type = self.d.get('TYPE', 'UNKNOWN')
         if device_type == 'PLC':

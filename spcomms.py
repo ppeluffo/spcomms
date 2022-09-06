@@ -1,5 +1,5 @@
-#!/usr/bin/python3 -u
 #!/opt/anaconda3/envs/mlearn/bin/python3
+#!/usr/bin/python3 -u
 #
 
 """
@@ -12,6 +12,12 @@ El query_string que deben mandar los dispositivos es del tipo:
 ID:PABLO;TYPE:PLC;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
+
+----------------------------------------------------------------------------------------------------
+Version 1.1.0 @ 2022-08-31
+Agrego las clases para el manejo de 2 nuevos tipos de frames: OCEANUS y GENERICO.
+OCEANUS procesa los datos que vienen de las estaciones meteorologicas OCEANUS
+GENERICO procesa dato comunes. Solo para ver que algo llegue al servidor. No almacena nada.
 
 -----------------------------------------------------------------------------------------------------
 Version: 1.0.1 @ 2022-08-05
@@ -62,8 +68,65 @@ from FUNCAUX.UTILS.spc_log import *
 from FUNCAUX.UTILS.spc_config import Config
 from FUNCAUX.UTILS import spc_stats as stats
 
-version = '1.0.0 @ 2022-08-06'
+version = '1.1.0 @ 2022-08-31'
 # -----------------------------------------------------------------------------
+
+def decode_input ( query_string, stdin_args):
+    '''
+    La entrada puede ser GET (PLC,PLCPAY,SPX,...) o POST ( OCEANUS )
+    Todos los frames tienen un query_string que me va a determinar el TYPE.
+    Es lo primero que parseo
+    '''
+    l_elements = query_string.split(';')
+    d = {}
+    d['QUERY_STRING'] = query_string
+    #
+    log(module=__name__, function='decode_input', level='INFO', msg='QS: {0}'.format(query_string))
+    if query_string is None:
+        log(module=__name__, function='decode_input', level='ALERT', msg='ERROR QS NULL')
+        exit(1)
+    #
+    # Solo me quedo con ID,TYPE,VER, y el resto es PAYLOAD si es GET. Si es POST el payload esta en stdin_args
+    for s in l_elements[0:3]:
+        (key,value) = s.split(':')
+        d[key] = value
+    #
+    # De acuerdo al campo TYPE parseo el PAYLOAD
+    # En estos tipos el payload sale del GET
+    if ( d['TYPE'] in ['PLC', 'PLCPAY', 'SPX', 'SP5K']):
+        # Rearmo el payload
+        payload = ''
+        for s in l_elements[3:-1]:
+            payload += '{0};'.format(s)
+        # Elimino el ultimo ';'
+        payload = payload[:-1]
+        # El payload no puede tener caracteres no numericos al final
+        while not payload[-1].isdigit():
+            payload = payload[:-1]
+        d['PAYLOAD'] = payload
+        pid = os.getpid()
+        log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
+
+    elif ( d['TYPE'] in ['OCEANUS', 'GENERICO']):
+        # El payload esta en el stdin_args del POST
+        # stdin_args tiene codificacion UNICODE.
+        stdin_args_bytes = stdin_args.encode('ascii', 'surrogateescape')
+        # stdin_args_bytes son bytes. Lo convierto a una lista de caracteres imprimibles. ( descarto el resto )
+        l_payload = []
+        for i in stdin_args_bytes:
+            if i > 33 and i < 126:
+                l_payload.append(chr(i))
+        # Lo transformo en un string
+        payload = ''.join(l_payload)
+        d['PAYLOAD'] = payload
+
+    else:
+        # No reconozco el tipo.
+        log(module=__name__, function='decode_input', level='ALERT', msg='ERROR TYPE NO DETERMINADO')
+        exit(1)
+    #
+    return d
+
 
 if __name__ == '__main__':
 
@@ -71,8 +134,11 @@ if __name__ == '__main__':
     config_logger('SYSLOG')
     query_string = ''
     stats.init()
-    # Leo del cgi
+
+    # Leo del cgi GET
     query_string = os.environ.get('QUERY_STRING')
+    # Leo el stdin por si llego como POST
+    stdin_args = sys.stdin.read()
 
     # Modo consola ?
     if query_string is None and len(sys.argv) == 2:
@@ -92,44 +158,33 @@ if __name__ == '__main__':
             # Uso un query string fijo de test del archivo .conf
             query_string = Config['DEBUG']['debug_data_plcpay']
 
+        elif sys.argv[1] == 'DEBUG_DATA_OCEANUS':
+            # Uso un query string fijo de test del archivo .conf
+            query_string = Config['DEBUG']['debug_data_oceanus']
+
+        elif sys.argv[1] == 'DEBUG_DATA_GENERICO':
+            # Uso un query string fijo de test del archivo .conf
+            query_string = Config['DEBUG']['debug_data_generico']
+
         else:
-            print('ERROR: USO ./spcomms.py (DEBUG_DATA_SPX|DEBUG_DATA_SP5K|DEBUG_DATA_PLC|DEBUG_DATA_PLCPAY')
+            print('ERROR: USO ./spcomms.py (DEBUG_DATA_SPX|DEBUG_DATA_SP5K|DEBUG_DATA_PLC|DEBUG_DATA_PLCPAY|DEBUG_DATA_OCEANUS|DEBUG_DATA_GENERICO')
             exit(0)
 
         os.environ['QUERY_STRING'] = query_string
         log(module=__name__, function='__init__', level='WARN', msg='MODO CONSOLA: query_string: {0}'.format(query_string))
 
-    # Modo CGI
-    log(module=__name__, function='__init__', level='INFO', msg='QS: {0}'.format(query_string))
-    if query_string is None:
-        log(module=__name__, function='__init__', level='ALERT', msg='ERROR QS NULL')
-        exit(1)
-
-    # Proceso.
-    pid = os.getpid()
-    log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
-
-    # Parseo el query_string para determinar el TYPE y bifurcar a la clase correcta.
-    # ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
-    if not query_string[-1].isdigit():
-        query_string = query_string[:-1]
-    d = {}
-    try:
-        d = {k: v for (k, v) in [x.split(':') for x in query_string.split(';')]}
-        d['QUERY_STRING'] = query_string
-    except:
-        stats.inc_count_errors()
-        log(module=__name__, function='process', level='ERROR', msg='DECODE ERROR: QS={0}'.format(query_string))
+    d = decode_input( query_string, stdin_args)
 
     device_type = d.get('TYPE', 'UNKNOWN')
     dlgid = None
     response = None
+    #
     if device_type == 'PLC':
         from FUNCAUX.FRAMES.spc_frames4plc import PLC_frame
         plc_frame = PLC_frame(d)
         dlgid, response = plc_frame.process()
 
-    if device_type == 'PLCPAY':
+    elif device_type == 'PLCPAY':
         from FUNCAUX.FRAMES.spc_frames4plcpay import PLCPAY_frame
         plcpay_frame = PLCPAY_frame(d)
         dlgid, response = plcpay_frame.process()
@@ -143,6 +198,16 @@ if __name__ == '__main__':
         from FUNCAUX.FRAMES.spc_frames4sp5k import SP5K_frame
         sp5K_frame = SP5K_frame(d)
         dlgid, response = sp5K_frame.process()
+
+    elif device_type == 'OCEANUS':
+        from FUNCAUX.FRAMES.spc_frames4oceanus import OCEANUS_frame
+        oceanus_frame = OCEANUS_frame(d)
+        dlgid, response = oceanus_frame.process()
+
+    elif device_type == 'GENERICO':
+        from FUNCAUX.FRAMES.spc_frames4generico import GENERICO_frame
+        generico_frame = GENERICO_frame(d)
+        dlgid, response = generico_frame.process()
 
     elif device_type == 'UNKNOWN':
         print('Content-type: text/html\n\n', end='')
