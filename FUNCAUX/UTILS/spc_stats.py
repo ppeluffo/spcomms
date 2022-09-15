@@ -96,7 +96,7 @@ def end():
             f"qD={d_statistics['size_lqueue_data']}"
         )
 
-    log(module=__name__, function='STATS', level='ALERT', msg=logMsg )
+    #log(module=__name__, function='STATS', level='ALERT', msg=logMsg )
     return
 
 

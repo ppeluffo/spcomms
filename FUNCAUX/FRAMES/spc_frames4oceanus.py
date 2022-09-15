@@ -19,7 +19,7 @@ class OCEANUS_frame(BASE_frame):
         # Especializo el metodo con caracteristicas de estaciones OCEANUS
         self.dlgid = self.d.get('ID', '00000')
         self.version = self.d.get('VER', 'R0.0.0')
-        log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='D={0}</br>'.format(self.d))
+        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='D={0}</br>'.format(self.d))
 
         # Las variables que maneja la estacion OCEANUS son: HUM,TEMPER,PM10,TSP,PM2.5
         for needle in ['HUM:[0-9]+', 'TEMPER:[0-9]+', 'PM10:[0-9]+', 'PM2.5:[0-9]+', 'TSP:[0-9]+']:
@@ -34,7 +34,7 @@ class OCEANUS_frame(BASE_frame):
         self.rh = BD_REDIS()
         self.rh.enqueue_data_record(self.d, 'LQ_OCEANUSDATA')
 
-        self.response = ''
+        self.response = 'OK'
         self.process_response()
         return self.dlgid, self.response
 

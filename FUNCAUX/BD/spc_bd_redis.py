@@ -317,7 +317,28 @@ class BD_REDIS:
         log(module=__name__, function='exist_or_create_entry', level='ALERT', dlgid=dlgid, msg='CREATING REDIS {0} entry'.format(dlgid))
         return self.init_sysvars_record(dlgid)
 
+    def get_debug_dlgid(self):
+        # Leo de la redis el dlgid que debo loguer en modo SELECT    
+        if not self.connect():
+            log(module=__name__, function='get_debug_dlgid', level='ERROR', msg='REDIS NOT CONNECTED')
+            stats.inc_count_errors()
+            return None
 
+        # Si no hay registro ( HASH) del datalogger lo creo.
+        if not self.handle.exists('SPCOMMS','DEBUG_DLGID'):
+            # Lo creo
+            self.handle.hset('SPCOMMS', 'DEBUG_DLGID', 'None')
+            return None
+        else:
+            try:
+                debug_dlgid = self.handle.hget('SPCOMMS','DEBUG_DLGID')
+            except:
+                log(module=__name__, function='get_debug_dlgid', level='ERROR', msg='ERROR in HGET')
+                stats.inc_count_errors()
+                return None
+
+        #log(module=__name__, function='get_debug_dlgid', level='ERROR', msg='DEBUG_DLGID:{0}'.format(debug_dlgid))
+        return debug_dlgid
 
 
 

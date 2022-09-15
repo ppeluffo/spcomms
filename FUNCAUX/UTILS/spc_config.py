@@ -3,5 +3,6 @@
 import configparser
 
 Config = configparser.ConfigParser()
-Config.read('config/spy.conf')
+Config.read('config/spcomms.conf')
+
 

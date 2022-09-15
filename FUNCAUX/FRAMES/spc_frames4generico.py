@@ -15,9 +15,10 @@ class GENERICO_frame(BASE_frame):
 
         self.dlgid = self.d.get('ID', '00000')
         self.version = self.d.get('VER', 'R0.0.0')
-        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='D={0}</br>'.format(self.d))
+        log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='D={0}</br>'.format(self.d))
         
         self.response += 'GENERICO:{0};{1}'.format(dt.datetime.now().strftime('%y%m%d%H%M'), self.d['PAYLOAD'])
+        self.process_response()
         return self.dlgid, self.response
 
 

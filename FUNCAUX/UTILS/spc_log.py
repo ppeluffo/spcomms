@@ -17,6 +17,12 @@ from FUNCAUX.UTILS.spc_config import Config
 
 #syslogmode = 'SYSLOG'
 syslogmode = 'XPROCESS'
+debug_dlgid = None
+
+# https://stackoverflow.com/questions/11029717/how-do-i-disable-log-messages-from-the-requests-library
+urllib3_logger = logging.getLogger('urllib3')
+urllib3_logger.setLevel(logging.CRITICAL)
+
 
 def config_logger( modo='SYSLOG'):
     # logging.basicConfig(filename='log1.log', filemode='a', format='%(asctime)s %(name)s %(levelname)s %(message)s', level = logging.DEBUG, datefmt = '%d/%m/%Y %H:%M:%S' )
@@ -43,6 +49,13 @@ def config_logger( modo='SYSLOG'):
     LOG = logging.getLogger('spy')
     LOG.addHandler(handler)
 
+    # Leemos el dlgid sobre el cual haremos un debug selectivo
+    from FUNCAUX.BD.spc_bd_redis import BD_REDIS
+    redis = BD_REDIS()
+    global debug_dlgid
+    debug_dlgid = redis.get_debug_dlgid()
+    debug_dlgid = debug_dlgid.decode()
+
 
 def log(module,function,dlgid='00000',level='INFO', msg=''):
     '''
@@ -51,7 +64,8 @@ def log(module,function,dlgid='00000',level='INFO', msg=''):
     Si console es ON se hace un print del mensaje
     El flush al final de print es necesario para acelerar. !!!
     '''
-    debug_dlgid = Config['DEBUG']['debug_dlg']
+    global debug_dlgid
+    # debug_dlgid = Config['DEBUG']['debug_dlg']
     dlevel = {'INFO':0, 'WARN':1, 'ALERT':2, 'ERROR':3, 'SELECT':4, 'DEBUG':5 }
 
     debug_configurado = dlevel[ Config['DEBUG']['debug_level'] ]
@@ -68,7 +82,7 @@ def log(module,function,dlgid='00000',level='INFO', msg=''):
     if  level == 'SELECT':
         if dlgid == debug_dlgid :
             if syslogmode == 'SYSLOG':
-                logging.info('SPY.py [{0}][{1}][{2}]:[{3}]'.format( dlgid,module,function,msg))
+                logging.info('SPCOMMS [{0}][{1}][{2}]:[{3}]'.format( dlgid,module,function,msg))
             else:
                 print('{0} {1}:: [{2}][{3}][{4}]:[{5}]'.format( datetime.now(), syslogmode, dlgid, module, function, msg), flush=True)
         return
@@ -76,7 +90,7 @@ def log(module,function,dlgid='00000',level='INFO', msg=''):
     else:
         # El resto de los mensajes los logueo TODOS ( WARN,ALERT,ERROR etc)
         if syslogmode == 'SYSLOG':
-            logging.info('SPY.py [{0}][{1}][{2}]:[{3}]'.format( dlgid,module,function,msg))
+            logging.info('SPCOMMS [{0}][{1}][{2}]:[{3}]'.format( dlgid,module,function,msg))
         else:
             print('{0} {1}:: [{2}][{3}][{4}]:[{5}]'.format( datetime.now(), syslogmode, dlgid, module, function, msg), flush=True)
 

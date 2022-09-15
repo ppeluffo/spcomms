@@ -7,6 +7,7 @@ Lee las magnitudes definidas para el datalogger de modo que los frames no den er
 
 import numpy as np
 import urllib.request
+import requests
 from FUNCAUX.BD.spc_bd_gda import BD_GDA
 
 
@@ -17,8 +18,8 @@ class SENDFRAMES:
         self.response = None
         self.dlgid = 'DEFAULT'
         self.server = '127.0.0.1'
-        self.script = 'spyplc.py'
-        self.path = 'SPYPLC'
+        self.script = 'spcomms.py'
+        self.path = 'COMMS'
         self.port = 80
         self.fw_ver = '4.0.4b'
         self.verbose = True
@@ -26,6 +27,10 @@ class SENDFRAMES:
         self.payload = ''
         self.type = ''
         self.frame_list = None
+        self.cgi_type = 'GET'
+
+    def set_cgi_type(self, cgi_type):
+        self.cgi_type = cgi_type
 
     def set_type(self, type):
         self.type = type
@@ -55,12 +60,13 @@ class SENDFRAMES:
         self.frame_list = frame_list
 
     def get_params(self):
+        print('TYPE: {}'.format(self.type))
+        print('CGI: {}'.format(self.cgi_type))
         print('DLGID = {}'.format(self.dlgid))
         print('SERVER = {}'.format(self.server))
         print('PORT = {}'.format(self.port))
         print('FW_VER: {}'.format(self.fw_ver))
         print('SCRIPT: {}'.format(self.script))
-        print('TYPE: {}'.format(self.type))
         print('VERBOSE: {}'.format(self.verbose))
 
     def prepare_random_payload(self):
@@ -100,10 +106,7 @@ class SENDFRAMES:
             self.payload = self.payload.replace('REPLACE_VAL', new_val, 1)
         return self.payload
 
-    def send(self):
-        if self.verbose:
-            print('\nFrame:')
-
+    def send_cgi_GET(self):
         # Header
         self.url = 'http://{0}:{1}/cgi-bin/{2}/{3}?ID:{4};TYPE:{5};VER:{6};'.format(self.server, self.port, self.path, self.script, self.dlgid, self.type, self.fw_ver)
         #
@@ -126,5 +129,30 @@ class SENDFRAMES:
 
         if self.verbose:
             print('RESP: {0}'.format(self.response))
-        #
 
+    def send_cgi_POST(self):
+        # La primer parte es un GET
+        self.url = 'http://{0}:{1}/cgi-bin/{2}/{3}?ID:{4};TYPE:{5};VER:{6};'.format(self.server, self.port, self.path, self.script, self.dlgid, self.type, self.fw_ver)
+        if self.verbose:
+            print('SENT GETpart: {0}'.format(self.url))
+        # Envio
+        # Los datos van en un POST
+        payload = {'key1': 'value1', 'key2': 'value2'}
+        r = requests.post( self.url , data=payload)
+
+        # Response
+        if self.verbose:
+            print('RESP: {0}'.format(r.text))
+
+    def send(self):
+        if self.verbose:
+            print('\nFrame:')
+        #
+        if self.cgi_type == 'GET':
+            self.send_cgi_GET()
+        elif self.cgi_type == 'POST':
+            self.send_cgi_POST()
+        else:
+            print('SENT ERROR: {0}'.format(self.cgi_type))
+        #
+        return

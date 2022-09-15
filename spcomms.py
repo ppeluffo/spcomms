@@ -1,5 +1,5 @@
-#!/opt/anaconda3/envs/mlearn/bin/python3
 #!/usr/bin/python3 -u
+#!/opt/anaconda3/envs/mlearn/bin/python3
 #
 
 """
@@ -12,6 +12,13 @@ El query_string que deben mandar los dispositivos es del tipo:
 ID:PABLO;TYPE:PLC;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
+
+----------------------------------------------------------------------------------------------------
+Version 1.2.0 @ 2022-09-13
+Todos los protocolos traern una parte de GET y luego, los de OCEANUS traen un POST.
+Esto hace que primero leo siempre el GET y luego decodifico. Si el protocolo es POST, leo el stdin.
+Agrego que el datalogger que se loguea especificamente se escriba en REDIS y no se toque mas el spcomms.conf
+El nuevo archivo de configuracion es spcomms.conf
 
 ----------------------------------------------------------------------------------------------------
 Version 1.1.0 @ 2022-08-31
@@ -65,26 +72,26 @@ Host: www.spymovil.com
 import os
 import sys
 from FUNCAUX.UTILS.spc_log import *
-from FUNCAUX.UTILS.spc_config import Config
 from FUNCAUX.UTILS import spc_stats as stats
 
-version = '1.1.0 @ 2022-08-31'
+version = '1.2.0 @ 2022-09-13'
 # -----------------------------------------------------------------------------
 
-def decode_input ( query_string, stdin_args):
+def decode_input ( query_string ):
     '''
     La entrada puede ser GET (PLC,PLCPAY,SPX,...) o POST ( OCEANUS )
     Todos los frames tienen un query_string que me va a determinar el TYPE.
     Es lo primero que parseo
     '''
+    if query_string is None:
+        log(module=__name__, function='decode_input', level='ALERT', msg='ERROR QS NULL')
+        exit(1)
+
     l_elements = query_string.split(';')
     d = {}
     d['QUERY_STRING'] = query_string
     #
-    log(module=__name__, function='decode_input', level='INFO', msg='QS: {0}'.format(query_string))
-    if query_string is None:
-        log(module=__name__, function='decode_input', level='ALERT', msg='ERROR QS NULL')
-        exit(1)
+    #log(module=__name__, function='decode_input', level='INFO', msg='QS: {0}'.format(query_string))
     #
     # Solo me quedo con ID,TYPE,VER, y el resto es PAYLOAD si es GET. Si es POST el payload esta en stdin_args
     for s in l_elements[0:3]:
@@ -92,11 +99,11 @@ def decode_input ( query_string, stdin_args):
         d[key] = value
     #
     # De acuerdo al campo TYPE parseo el PAYLOAD
-    # En estos tipos el payload sale del GET
     if ( d['TYPE'] in ['PLC', 'PLCPAY', 'SPX', 'SP5K']):
+        # En estos tipos el payload sale del GET
         # Rearmo el payload
         payload = ''
-        for s in l_elements[3:-1]:
+        for s in l_elements[3:]:
             payload += '{0};'.format(s)
         # Elimino el ultimo ';'
         payload = payload[:-1]
@@ -110,6 +117,8 @@ def decode_input ( query_string, stdin_args):
     elif ( d['TYPE'] in ['OCEANUS', 'GENERICO']):
         # El payload esta en el stdin_args del POST
         # stdin_args tiene codificacion UNICODE.
+        # Leo el stdin por si llego como POST
+        stdin_args = sys.stdin.read()
         stdin_args_bytes = stdin_args.encode('ascii', 'surrogateescape')
         # stdin_args_bytes son bytes. Lo convierto a una lista de caracteres imprimibles. ( descarto el resto )
         l_payload = []
@@ -119,6 +128,7 @@ def decode_input ( query_string, stdin_args):
         # Lo transformo en un string
         payload = ''.join(l_payload)
         d['PAYLOAD'] = payload
+        log(module=__name__, function='decode_input', level='INFO', msg='POST RX PAYLOAD:[{0}]'.format(payload))
 
     else:
         # No reconozco el tipo.
@@ -134,47 +144,10 @@ if __name__ == '__main__':
     config_logger('SYSLOG')
     query_string = ''
     stats.init()
-
-    # Leo del cgi GET
+    # Leo el cgi GET ( Todos los protocolos lo traen )
     query_string = os.environ.get('QUERY_STRING')
-    # Leo el stdin por si llego como POST
-    stdin_args = sys.stdin.read()
-
-    # Modo consola ?
-    if query_string is None and len(sys.argv) == 2:
-        if sys.argv[1] == 'DEBUG_DATA_SPX':
-            # Uso un query string fijo de test del archivo .conf
-            query_string = Config['DEBUG']['debug_data_spx']
-
-        elif sys.argv[1] == 'DEBUG_DATA_SP5K':
-            # Uso un query string fijo de test del archivo .conf
-            query_string = Config['DEBUG']['debug_data_sp5k']
-
-        elif sys.argv[1] == 'DEBUG_DATA_PLC':
-            # Uso un query string fijo de test del archivo .conf
-            query_string = Config['DEBUG']['debug_data_plc']
-
-        elif sys.argv[1] == 'DEBUG_DATA_PLCPAY':
-            # Uso un query string fijo de test del archivo .conf
-            query_string = Config['DEBUG']['debug_data_plcpay']
-
-        elif sys.argv[1] == 'DEBUG_DATA_OCEANUS':
-            # Uso un query string fijo de test del archivo .conf
-            query_string = Config['DEBUG']['debug_data_oceanus']
-
-        elif sys.argv[1] == 'DEBUG_DATA_GENERICO':
-            # Uso un query string fijo de test del archivo .conf
-            query_string = Config['DEBUG']['debug_data_generico']
-
-        else:
-            print('ERROR: USO ./spcomms.py (DEBUG_DATA_SPX|DEBUG_DATA_SP5K|DEBUG_DATA_PLC|DEBUG_DATA_PLCPAY|DEBUG_DATA_OCEANUS|DEBUG_DATA_GENERICO')
-            exit(0)
-
-        os.environ['QUERY_STRING'] = query_string
-        log(module=__name__, function='__init__', level='WARN', msg='MODO CONSOLA: query_string: {0}'.format(query_string))
-
-    d = decode_input( query_string, stdin_args)
-
+    d = decode_input( query_string )
+    #
     device_type = d.get('TYPE', 'UNKNOWN')
     dlgid = None
     response = None
@@ -215,5 +188,5 @@ if __name__ == '__main__':
         log(module=__name__, function='u_send_response', level='ERROR', msg='UNKNOWN FRAME')
         exit(0)
 
-    log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} DLGID:{1}: Process OK: RSP={2}'.format(pid, dlgid, response))
+    log(module=__name__, function='__init__', level='ALERT', msg='DLGID:{0}: Process OK: RSP={1}'.format(dlgid, response))
     stats.end()
