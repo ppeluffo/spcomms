@@ -32,6 +32,10 @@ class PLC_frame(BASE_frame):
     def process_automatismos(self):
         # Guardo la linea recibida (d['RCVD']) en Redis en el campo 'LINE', para otros procesamientos
         # El formato debe ser igual al original.
+        #
+        # Si el datalogger no tiene registros en REDIS los creo.
+        self.rh.init_sysvars_record(self.dlgid)
+        #
         rcvd_line_new_format = self.convert_rcvd_line_to_old_format(self.d)
         self.rh.save_line( self.dlgid, rcvd_line_new_format)
         # Copio de "lastMODBUS" a "MODBUS" ( Esto es para prender/apagar las bombas !!!)

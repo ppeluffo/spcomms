@@ -14,6 +14,10 @@ ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 
 ----------------------------------------------------------------------------------------------------
+Version 1.2.1 @ 2022-10-03:
+Se agrega que en los PLC si no existe el registro redis, lo cree.
+
+----------------------------------------------------------------------------------------------------
 Version 1.2.0 @ 2022-09-13
 Todos los protocolos traern una parte de GET y luego, los de OCEANUS traen un POST.
 Esto hace que primero leo siempre el GET y luego decodifico. Si el protocolo es POST, leo el stdin.

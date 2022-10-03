@@ -78,9 +78,9 @@ def process_master():
     #process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay]
     #child_types = ['SPX','SP5K','PLC','PLCPAY']
     #process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
-    process_list = [plist_plc, plist_plcpay ]
-    child_types = ['PLC','PLCPAY','OCEANUS']
-    process_poolsizes = [ MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS ]
+    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay ]
+    child_types = ['SPX','SP5K', 'PLC','PLCPAY','OCEANUS']
+    process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS ]
     #logger.info(plist)
     # Creo todos los procesos child.
     for plist, child_type, poolsize in zip( process_list, child_types, process_poolsizes ):
