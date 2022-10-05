@@ -2,6 +2,9 @@
 #!/opt/anaconda3/envs/mlearn/bin/python3
 
 '''
+Version 2.1 @ 2022-10-05:
+Corrijo el bug que no estaba definida la cola plist_oceanus por lo que no procesaba datos de OCEANUS
+
 Version 2.0 @ 2022-08-02:
 Ulises modifica para que se haga una insercion sola con todos los datos.
 
@@ -75,10 +78,11 @@ def process_master():
     plist_sp5k = []
     plist_plc = []
     plist_plcpay = []
+    plist_oceanus = []
     #process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay]
     #child_types = ['SPX','SP5K','PLC','PLCPAY']
     #process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
-    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay ]
+    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay, plist_oceanus ]
     child_types = ['SPX','SP5K', 'PLC','PLCPAY','OCEANUS']
     process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS ]
     #logger.info(plist)
