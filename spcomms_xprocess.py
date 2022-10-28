@@ -2,6 +2,7 @@
 #!/usr/bin/python3 -u
 
 '''
+<<<<<<< HEAD
 ----------------------------------------------------------------------------------------------------
 Version 2.1 @ 2022-10-26:
 Problema: Cuando tenemos una red de automatismos, cuando el TANQUE envia los datos, no se hace el
@@ -13,6 +14,11 @@ Problema: Cuando tenemos una red de automatismos, cuando el TANQUE envia los dat
 Solucion: Copiamos el broadcast_local_vars() de spy.py  y lo adaptamos.
           Esto lo hacemos en el PROCESS de los PLC
 ----------------------------------------------------------------------------------------------------
+=======
+Version 2.1 @ 2022-10-05:
+Corrijo el bug que no estaba definida la cola plist_oceanus por lo que no procesaba datos de OCEANUS
+
+>>>>>>> e7d4e0be21f090dd19623ec972b93745c307553a
 Version 2.0 @ 2022-08-02:
 Ulises modifica para que se haga una insercion sola con todos los datos.
 ----------------------------------------------------------------------------------------------------
