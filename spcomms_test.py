@@ -19,12 +19,12 @@ if __name__ == '__main__':
 
     #
     #for frame_type in ['SPX', 'SP5K', 'PLC', 'PLCPAY', 'OCEANUS', 'GENERICO']:
-    for frame_type in ['PLC']:
+    for frame_type in ['PLCR2']:
         print('\n------------------------------------------')
         sendframes.set_type(frame_type)
         sendframes.set_dlgid('DLGTEST')
         sendframes.set_verbose(True)
-        if frame_type in ['OCEANUS', 'GENERICO']:
+        if frame_type in ['OCEANUS', 'GENERICO', 'PLCR2']:
             sendframes.set_cgi_type('POST')
         else:
             sendframes.set_cgi_type('GET')

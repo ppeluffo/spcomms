@@ -268,7 +268,7 @@ class BD_REDIS:
                 stats.inc_count_errors()
                 return None
 
-            log(module=__name__, function='get_d_reenvios', level='SELECT', dlgid=dlgid, msg='REDIS D_REENVIOS={}'.format(d_reenvios))
+            # log(module=__name__, function='get_d_reenvios', level='SELECT', dlgid=dlgid, msg='REDIS D_REENVIOS={}'.format(d_reenvios))
             return d_reenvios
 
         else:

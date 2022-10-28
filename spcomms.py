@@ -1,5 +1,5 @@
-#!/usr/bin/python3 -u
 #!/opt/anaconda3/envs/mlearn/bin/python3
+#!/usr/bin/python3 -u
 #
 
 """
@@ -12,6 +12,23 @@ El query_string que deben mandar los dispositivos es del tipo:
 ID:PABLO;TYPE:PLC;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
+
+----------------------------------------------------------------------------------------------------
+Version 1.2.3 @ 2022-10-26:
+Problema: Cuando tenemos una red de automatismos, cuando el TANQUE envia los datos, no se hace el
+          broadcast de las variables a la REDIS:MODBUS:DLG_REMOTOS. Por lo tanto los remotos no tienen datos
+          para leer en sus frames de respuestas.
+          El programa SI considera la REDIS:MODBUS al armar el frame ya que en los casos que tenemos
+          un mix de tanques (spy.py) con perforaciones (spcomms.py) funciona. ( rh.get_modbusline() )
+          El tema es en la RECEPCION y PROCESS del frame de spcomms.py que no hacemos el broadcast_local_vars().
+Solucion: Copiamos el broadcast_local_vars() de spy.py en spcomm.py y lo adaptamos.
+          Esto lo hacemos en el PROCESS.
+
+----------------------------------------------------------------------------------------------------
+Version 1.2.2 @ 2022-10-03:
+Agrego el tipo PLCR2 en el cual manejamos el concepto de los memblocks.
+En el post viene un memblock con determinada definicion de variables.
+Es la forma de comunicarse la nueva version de firmware de PLCs
 
 ----------------------------------------------------------------------------------------------------
 Version 1.2.1 @ 2022-10-03:
@@ -59,8 +76,9 @@ Esta clase hace:
 Testing:
 - Con telnet:
 telnet localhost 80
-GET /cgi-bin/COMMS/spcomms.py?ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
- HTTP/1.1
+#GET /cgi-bin/COMMS/spcomms.py?ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
+GET /cgi-bin/COMMS/spcomms.py?ID:SJTQ001;TYPE:PLC;VER:4.0.4a;LTQ:1.68;LTQ1:1.70;bt:14.38
+HTTP/1.1
 Host: www.spymovil.com
 
 telnet www.spymovil.com 90
@@ -134,6 +152,16 @@ def decode_input ( query_string ):
         d['PAYLOAD'] = payload
         log(module=__name__, function='decode_input', level='INFO', msg='POST RX PAYLOAD:[{0}]'.format(payload))
 
+    elif ( d['TYPE'] in ['PLCR2']):
+        # El payload esta en el stdin_args del POST
+        # stdin_args tiene codificacion UNICODE.
+        # Leo el stdin por si llego como POST
+        stdin_args = sys.stdin.read()
+        stdin_args_bytes = stdin_args.encode('ascii', 'surrogateescape')
+        # stdin_args_bytes son bytes.
+        d['PAYLOAD'] = stdin_args_bytes
+        log(module=__name__, function='decode_input', level='INFO', msg='POST PLCR2 RX PAYLOAD:[{0}]'.format(d['PAYLOAD']))
+
     else:
         # No reconozco el tipo.
         log(module=__name__, function='decode_input', level='ALERT', msg='ERROR TYPE NO DETERMINADO')
@@ -185,6 +213,11 @@ if __name__ == '__main__':
         from FUNCAUX.FRAMES.spc_frames4generico import GENERICO_frame
         generico_frame = GENERICO_frame(d)
         dlgid, response = generico_frame.process()
+
+    elif device_type == 'PLCR2':
+        from FUNCAUX.FRAMES.spc_frames4plcR2 import PLCR2_frame
+        plcR2_frame = PLCR2_frame(d)
+        dlgid, response = plcR2_frame.process()
 
     elif device_type == 'UNKNOWN':
         print('Content-type: text/html\n\n', end='')

@@ -1,15 +1,27 @@
-#!/usr/bin/python3 -u
 #!/opt/anaconda3/envs/mlearn/bin/python3
+#!/usr/bin/python3 -u
 
 '''
+----------------------------------------------------------------------------------------------------
+Version 2.1 @ 2022-10-26:
+Problema: Cuando tenemos una red de automatismos, cuando el TANQUE envia los datos, no se hace el
+          broadcast de las variables a la REDIS:MODBUS:DLG_REMOTOS. Por lo tanto los remotos no tienen datos
+          para leer en sus frames de respuestas.
+          El programa SI considera la REDIS:MODBUS al armar el frame ya que en los casos que tenemos
+          un mix de tanques (spy.py) con perforaciones (spcomms.py) funciona. ( rh.get_modbusline() )
+          El tema es en la RECEPCION y PROCESS del frame de spcomms.py que no hacemos el broadcast_local_vars().
+Solucion: Copiamos el broadcast_local_vars() de spy.py  y lo adaptamos.
+          Esto lo hacemos en el PROCESS de los PLC
+----------------------------------------------------------------------------------------------------
 Version 2.0 @ 2022-08-02:
 Ulises modifica para que se haga una insercion sola con todos los datos.
-
+----------------------------------------------------------------------------------------------------
 Version 1.0:
 Servidor de procesamiento de frames recibidos de los PLC que están en la REDIS.
 El __main__ invoca a un proceso master.
 Este master crea un pool de processo child que quedan leyendo la REDIS.
 Si hay datos la sacan y procesan.
+----------------------------------------------------------------------------------------------------
 '''
 from multiprocessing import Process
 import time
@@ -21,12 +33,14 @@ from FUNCAUX.PROCESS.spc_processPLCPAY import ProcessPLCPAY
 from FUNCAUX.PROCESS.spc_processSPX import ProcessSPX
 from FUNCAUX.PROCESS.spc_processSP5K import ProcessSP5K
 from FUNCAUX.PROCESS.spc_processOCEANUS import ProcessOCEANUS
+from FUNCAUX.PROCESS.spc_processPLCV2 import ProcessPLCV2
 
 MAXPOOLSIZE_SPX=2
 MAXPOOLSIZE_SP5K=2
 MAXPOOLSIZE_PLC=2
 MAXPOOLSIZE_PLCPAY=2
 MAXPOOLSIZE_OCEANUS=2
+MAXPOOLSIZE_PLCV2=2
 
 DATABOUNDLESIZE=50
 
@@ -44,6 +58,8 @@ def process_child(child_type='PLC'):
         p = ProcessSP5K('LQ_SP5KDATA', 'SP5K')
     elif child_type == 'OCEANUS':
         p = ProcessOCEANUS('LQ_OCEANUSDATA', 'OCEANUS')
+    elif child_type == 'PLCV2':
+        p = ProcessOCEANUS('LQ_PLCV2DATA', 'PLCV2')
     else:
         log(module=__name__, function='process_child', level='ERROR', msg='ERROR: child_type = {0}'.format(child_type))
         return
@@ -75,12 +91,11 @@ def process_master():
     plist_sp5k = []
     plist_plc = []
     plist_plcpay = []
-    #process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay]
-    #child_types = ['SPX','SP5K','PLC','PLCPAY']
-    #process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY ]
-    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay ]
-    child_types = ['SPX','SP5K', 'PLC','PLCPAY','OCEANUS']
-    process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS ]
+    plist_oceanus = []
+    plist_plcV2 = []
+    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay, plist_oceanus, plist_plcV2 ]
+    child_types = ['SPX','SP5K', 'PLC','PLCPAY','OCEANUS', 'PLCV2']
+    process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS, MAXPOOLSIZE_PLCV2 ]
     #logger.info(plist)
     # Creo todos los procesos child.
     for plist, child_type, poolsize in zip( process_list, child_types, process_poolsizes ):

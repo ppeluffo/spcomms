@@ -9,7 +9,8 @@ import numpy as np
 import urllib.request
 import requests
 from FUNCAUX.BD.spc_bd_gda import BD_GDA
-
+from FUNCAUX.UTILS.spc_memblocks import MEMBLOCK
+import re
 
 class SENDFRAMES:
 
@@ -129,6 +130,7 @@ class SENDFRAMES:
 
         if self.verbose:
             print('RESP: {0}'.format(self.response))
+        return self.response
 
     def send_cgi_POST(self):
         # La primer parte es un GET
@@ -137,12 +139,30 @@ class SENDFRAMES:
             print('SENT GETpart: {0}'.format(self.url))
         # Envio
         # Los datos van en un POST
-        payload = {'key1': 'value1', 'key2': 'value2'}
+        if self.type == 'PLCR2':
+            payload = b'\x0e\x00\x00\x00\xcd\xcc\xf6Bd\x00\x00\x00\xc3\xf5H@\xcd\xcc,@'
+        else:
+            payload = {'key1': 'value1', 'key2': 'value2'}
         r = requests.post( self.url , data=payload)
 
         # Response
+        # La respuesta viene en un header HTML !!!
         if self.verbose:
             print('RESP: {0}'.format(r.text))
+
+        if self.type == 'PLCR2':
+            # <html><body><h1>b' \x00\x00\x00\xd7\xa3\xcaB\x02\x00\x00\x00\xecq\xb2Cf\xa6!F'</h1></body></html>
+            # Decodifico ( fixed mode ) el frame recibido de PLCR2 para ver que ande todo bien
+            # as per recommendation from @freylis, compile once only
+            raw_html = r.text
+            CLEANR = re.compile('<.*?>')
+            cleantext = re.sub(CLEANR, '', raw_html)
+            print('CLEANTEXT: {0}'.format(cleantext))
+            #rx_payload = str.encode(cleantext)
+            #print('RX_PAYLOAD: {0}'.format(rx_payload))
+            #mbk = MEMBLOCK()
+            #d_mbk = mbk.convert_bytes2dict(rx_payload)
+            #print('D_MEMBLOCK: {0}'.format(d_mbk))
 
     def send(self):
         if self.verbose:
