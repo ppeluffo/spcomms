@@ -53,6 +53,23 @@ class ProcessPLC(ProcessBASE):
                     l_cmds_modbus.append((k_dlgid, regaddr, tipo, magval), )
         # l_cmds_modbus = [('PABLO1', '1965', 'float', 8.718), ('PABLO2', '1966', 'integer', 17)]
         #log(module=__name__, function='procesar_reenvios', level='INFO', dlgid=dlgid, msg='L_CMDS_MODBUS({0})={1}'.format(dlgid, l_cmds_modbus))
+        ''''
+        l_cmds_modbus = [('YCHTEST1', '1962', 'float', 1.68),
+         ('YCHTEST1', '2032', 'float', 1.7),
+         ('SJPERF021', '1962', 'float', 1.68),
+         ('SJPERF021', '2032', 'float', 1.7),
+         ('SJPERF001', '1962', 'float', 1.68),
+         ('SJPERF001', '2032', 'float', 1.7),
+         ('SJPERF002', '1962', 'float', 1.68),
+         ('SJPERF002', '2032', 'float', 1.7) ]
+        '''
+        log(module=__name__, function='procesar_reenvios', level='INFO', dlgid=dlgid, msg='DEBUG: L_CMDS_MODBUS({0})={1}'.format(dlgid, l_cmds_modbus))
+        # Recorro la lista e inserto en la redis de c/dlg la linea correspondiente.
+        for t in l_cmds_modbus:
+            (dlgid, register, dataType, value) = t
+            # llamo a la funcion para escribir el key MODBUS de redis en cada ejecucion del for
+            mbusWrite(dlgid, register, dataType, value)
+            log(module=__name__, function='procesar_reenvios', level='INFO', dlgid=dlgid, msg='DEBUG: T={0}'.format(t))
         return
 
     def process_queue(self):
