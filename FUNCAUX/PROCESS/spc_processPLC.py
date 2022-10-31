@@ -54,7 +54,10 @@ class ProcessPLC(ProcessBASE):
                         magval = int(magval)
                     # d_reenvios[dlgid][magname]['VALOR'] = magval
                     l_cmds_modbus.append((k_dlgid, regaddr, tipo, magval), )
-        # l_cmds_modbus = [('PABLO1', '1965', 'float', 8.718), ('PABLO2', '1966', 'integer', 17)
+
+        # l_cmds_modbus = [('PABLO1', '1965', 'float', 8.718), ('PABLO2', '1966', 'integer', 17)]
+        #log(module=__name__, function='procesar_reenvios', level='INFO', dlgid=dlgid, msg='L_CMDS_MODBUS({0})={1}'.format(dlgid, l_cmds_modbus))
+
         ''''
         l_cmds_modbus = [('YCHTEST1', '1962', 'float', 1.68),
          ('YCHTEST1', '2032', 'float', 1.7),
