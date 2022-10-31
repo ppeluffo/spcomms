@@ -1,5 +1,5 @@
-#!/opt/anaconda3/envs/mlearn/bin/python3
 #!/usr/bin/python3 -u
+#!/opt/anaconda3/envs/mlearn/bin/python3
 
 '''
 <<<<<<< HEAD
