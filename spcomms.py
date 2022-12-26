@@ -1,8 +1,9 @@
-#!/usr/bin/python3 -u
 #!/opt/anaconda3/envs/mlearn/bin/python3
+#!/usr/bin/python3 -u
 #
 
 """
+
 Servidor de comunicaciones generales de los dispositivos de SPYMOVIL.
 Todos los equipos acceden inicialmente a este script.
 Se decodifica el query_string y se genera un diccionario.
@@ -12,6 +13,10 @@ El query_string que deben mandar los dispositivos es del tipo:
 ID:PABLO;TYPE:PLC;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
+
+----------------------------------------------------------------------------------------------------
+Version 1.2.4 @ 2022-12-10:
+- Creo una nuevo tipo de frames (SPXR2) para los nuevos dataloggers.
 
 ----------------------------------------------------------------------------------------------------
 Version 1.2.3 @ 2022-10-26:
@@ -96,8 +101,10 @@ import sys
 from FUNCAUX.UTILS.spc_log import *
 from FUNCAUX.UTILS import spc_stats as stats
 
+
 version = '1.2.0 @ 2022-09-13'
 # -----------------------------------------------------------------------------
+
 
 def decode_input ( query_string ):
     '''
@@ -110,16 +117,21 @@ def decode_input ( query_string ):
         exit(1)
 
     l_elements = query_string.split(';')
+
+    d_tmp = { k:v for (k, v) in [x.split(':') for x in query_string.split(';') if ':' in x ] }
     d = {}
     d['QUERY_STRING'] = query_string
+    d['TYPE'] = d_tmp['TYPE']
     #
-    #log(module=__name__, function='decode_input', level='INFO', msg='QS: {0}'.format(query_string))
+    log(module=__name__, function='decode_input', level='ERROR', msg='QS1: {0}'.format(query_string))
+    log(module=__name__, function='decode_input', level='ERROR', msg='TYPE: {0}'.format(d['TYPE']))
     #
     # Solo me quedo con ID,TYPE,VER, y el resto es PAYLOAD si es GET. Si es POST el payload esta en stdin_args
     for s in l_elements[0:3]:
         (key,value) = s.split(':')
         d[key] = value
     #
+
     # De acuerdo al campo TYPE parseo el PAYLOAD
     if ( d['TYPE'] in ['PLC', 'PLCPAY', 'SPX', 'SP5K']):
         # En estos tipos el payload sale del GET
@@ -132,6 +144,17 @@ def decode_input ( query_string ):
         # El payload no puede tener caracteres no numericos al final
         while not payload[-1].isdigit():
             payload = payload[:-1]
+        d['PAYLOAD'] = payload
+        pid = os.getpid()
+        log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
+
+    elif ( d['TYPE'] in ['SPXR2'] ):
+        # El payload puede terminar en letras cuando trae el cks por lo tanto lo debo procesar en particular.
+        payload = ''
+        for s in l_elements[3:]:
+            payload += f'{s};'
+        # Elimino el ultimo ';'
+        payload = payload[:-1]
         d['PAYLOAD'] = payload
         pid = os.getpid()
         log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
@@ -218,6 +241,11 @@ if __name__ == '__main__':
         from FUNCAUX.FRAMES.spc_frames4plcR2 import PLCR2_frame
         plcR2_frame = PLCR2_frame(d)
         dlgid, response = plcR2_frame.process()
+
+    elif device_type == 'SPXR2':
+        from FUNCAUX.FRAMES.spc_framesBase_spxR2 import SPXR2_FRAME
+        spxR2_frame = SPXR2_FRAME(d)
+        dlgid, response = spxR2_frame.process()
 
     elif device_type == 'UNKNOWN':
         print('Content-type: text/html\n\n', end='')

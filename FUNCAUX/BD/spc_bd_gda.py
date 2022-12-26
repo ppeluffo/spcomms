@@ -7,7 +7,7 @@ from sqlalchemy import text
 from FUNCAUX.UTILS import spc_stats as stats
 from FUNCAUX.UTILS.spc_config import Config
 from FUNCAUX.UTILS.spc_log import log
-
+import pickle
 
 class BD_GDA:
 
@@ -345,3 +345,50 @@ class BD_GDA:
 
         log(module=__name__, function='get_d_reenvios', dlgid=dlgid, level='SELECT', msg='D_REMOTOS={0}'.format(d))
         return d
+
+    # ------------------------------------------------------------------------
+    # Consultas especializadas en SPXR2
+
+    def get_dlgid_from_uid(self,uid):
+
+        '''
+        Consulta en GDA con clave UID para encontrar el DLGID correspondiente
+        '''
+        sql = f"""SELECT u.dlgid FROM spx_configuracion_parametros AS cp 
+            INNER JOIN spx_unidades_configuracion AS uc ON cp.configuracion_id = uc.id 
+            INNER JOIN spx_unidades AS u ON u.id = uc.dlgid_id 
+            WHERE uc.nombre = 'BASE' AND cp.parametro = 'UID' AND value = '{uid}';"""
+
+        #
+        rp = self.exec_sql('DEFAULT', sql)
+        try:
+            results = rp.fetchall()
+        except AttributeError as ax:
+            log(module=__name__, function='get_dlgid_from_uid', level='ERROR', msg= f'AttributeError fetchall: {ax}')
+            return None
+        except Exception as ex:  # good idea to be prepared to handle various fails
+            log(module=__name__, function='get_dlgid_from_uid', level='ERROR', msg= f'Exception fetchall: {ex}')
+            return None
+
+        log(module=__name__, function='get_dlgid_from_uid', dlgid='DEFAULT', level='SELECT', msg='Reading dlgid_from_uid in GDA.')
+        if len(results) == 0:
+            return None
+            
+        dlgid = results[0][0]
+        #
+        log(module=__name__, function='get_dlgid_from_uid', level='INFO', msg=f'UID:{uid}, DLGID:{dlgid}')
+        return dlgid
+
+    def get_pickle_conf_from_gda(self,dlgid):
+        '''
+        Devuleve la configuracion del datalogger en modo serializado
+        '''
+        d_conf = self.read_dlg_conf(dlgid)
+        if d_conf is None:
+            return None
+        pdict = pickle.dumps(d_conf)
+        return pdict
+
+    def update_uid(self, dlgid, uid):
+        pass
+    

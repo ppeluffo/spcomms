@@ -14,6 +14,7 @@ import pickle
 from FUNCAUX.UTILS import spc_stats as stats
 from FUNCAUX.UTILS.spc_config import Config
 from FUNCAUX.UTILS.spc_log import log
+from FUNCAUX.BD.spc_bd_gda import BD_GDA
 
 
 class BD_REDIS:
@@ -71,7 +72,12 @@ class BD_REDIS:
         if not self.handle.hexists(dlgid, 'DLGREMOTOS'):        # Guarda lista de dlg remotos en automatismos
             self.handle.hset(dlgid, 'DLGREMOTOS', 'NUL')
         if not self.handle.hexists(dlgid, 'VALID'):             # Validez del registro. Si no es valido, todo se debe
-            self.handle.hset(dlgid, 'VALID', "True")            # releer de BD persistente y recrear el registro
+            self.handle.hset(dlgid, 'VALID', "TRUE")            # releer de BD persistente y recrear el registro
+        if not self.handle.hexists(dlgid, 'CONFIG'):            # 
+            self.handle.hset(dlgid, 'CONFIG', 'NUL')
+        if not self.handle.hexists(dlgid, 'UID'):               # 
+            self.handle.hset(dlgid, 'UID', 'NUL')
+
         return True
 
     def save_statistics(self, pkdict):
@@ -300,22 +306,55 @@ class BD_REDIS:
             stats.inc_count_errors()
             return False
 
-    def exist_or_create_entry(self, dlgid):
+    def exist_entry(self, dlgid):
         '''
         Verifica que exista la entrada en Redis.
-        Si no existe la crea.
         '''
         if not self.connect():
             stats.inc_count_errors()
             return False
 
-        if self.handle.exists(dlgid):
-            log(module=__name__, function='exist_or_create_entry', level='ALERT', dlgid=dlgid, msg='REDIS {0} entry exists'.format(dlgid))
+        if self.handle.hexists(dlgid, 'CONFIG'):
+            log(module=__name__, function='exist_entry', level='ALERT', dlgid=dlgid, msg='REDIS {0} entry exists'.format(dlgid))
+            return True
+        else:
+            return False
+
+    def create_entry(self, dlgid):
+        '''
+        Crea la entrada en Redis.
+        '''
+        log(module=__name__, function='create_entry', level='ALERT', dlgid=dlgid, msg='CREATING REDIS {0} entry'.format(dlgid))
+        retS = self.init_sysvars_record(dlgid)
+        if retS:
+            return True
+        else:
+            return False
+        
+    def update_config(self, dlgid):
+        '''
+        Guarda la configuracion en modo pickle con la key CONFIG
+        '''
+        if self.exist_entry(dlgid):
+            gdah=BD_GDA()
+            pdict = gdah.get_pickle_conf_from_gda(dlgid)
+            if pdict is None:
+                return False
+            #
+            self.handle.hset(dlgid, 'CONFIG', pdict)
+            self.handle.hset(dlgid, 'VALID', "TRUE")
             return True
 
-        # No existe: lo creo.
-        log(module=__name__, function='exist_or_create_entry', level='ALERT', dlgid=dlgid, msg='CREATING REDIS {0} entry'.format(dlgid))
-        return self.init_sysvars_record(dlgid)
+    def get_config(self, dlgid):
+        '''
+        Recupera la clave dlgid, des-serializa y obtiene el diccionario con la configuracion
+        '''
+        pdict = self.handle.hget(dlgid, 'CONFIG')
+        if pdict is not None:
+            dconf = pickle.loads(pdict)
+        else:
+            dconf = None
+        return dconf
 
     def get_debug_dlgid(self):
         # Leo de la redis el dlgid que debo loguer en modo SELECT    
@@ -339,6 +378,67 @@ class BD_REDIS:
 
         #log(module=__name__, function='get_debug_dlgid', level='ERROR', msg='DEBUG_DLGID:{0}'.format(debug_dlgid))
         return debug_dlgid
+    
+    def check_config_valid(self, dlgid):
+        '''
+        Verfica que exista en REDIS un registro de configuracion del dlgid
+        con datos valido.
+        Si no existe trata de crearlo y carga la configuracion de GDA.
+        Si existe per la key VALID es False, descartamos y recargamos la configuracion
+        '''
+        if not self.exist_entry(dlgid):
+            # Creo la entrada
+            if not self.create_entry(dlgid):
+                return False
+            # Actualizo 
+            if not self.update_config(dlgid):
+                return False
+        
+        valid_conf = False
+        if not self.handle.hexists(dlgid, 'VALID'):
+            # Existe la entrada. Vemos si la actual configuracion es valida
+            self.handle.hset(dlgid, 'VALID', "FALSE")
+            
+        valid_flag = self.handle.hget(dlgid, 'VALID')
+        if valid_flag == "TRUE":
+            dconf = self.get_config(dlgid)
+            return dconf
+        else:
+            if not self.update_config(dlgid):
+                return False
+        #   
+        dconf = self.get_config(dlgid)
+        return dconf
 
+    def get_reset_order(self, dlgid):
+        '''
+        Si existe la key RESET en la redis, devuleve su valor
+        '''
+        if self.handle.hexists(dlgid, 'RESET'):             
+            s_rsp =  self.handle.hget(dlgid, 'RESET')
+            #print(f'REDIS RSP: {s_rsp}')
+        
+        if s_rsp == b'FALSE':
+            return False
+        else:
+            return True
 
+    def clear_reset_order(self, dlgid):
+        '''
+        Borra la orden de reset.
+        '''
+        if self.handle.hexists(dlgid, 'RESET'):          
+            self.handle.hset(dlgid, 'RESET', 'FALSE')
+     
+    def update_uid(self, dlgid, uid):
+        '''
+        Actualizo el UID
+        '''
+          # Leo de la redis el dlgid que debo loguer en modo SELECT    
+        if not self.connect():
+            stats.inc_count_errors()
+            return False
 
+        self.handle.hset(dlgid,'UID',uid)
+        return True
+        

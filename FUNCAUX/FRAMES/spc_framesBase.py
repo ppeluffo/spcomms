@@ -19,6 +19,7 @@ class BASE_frame:
         self.dlgid = None
         self.version = None
         self.rh = None
+        self.dict_payload = None
         self.response = ''
 
         stats.inc_count_frame()
@@ -50,7 +51,7 @@ class BASE_frame:
         #
         # Parseo ahora las variables que al ser un GET vinieron en el query_string
         try:
-            dp = {k: v for (k, v) in [x.split(':') for x in self.d['PAYLOAD'].split(';')]}
+            dp = {k: v for (k, v) in [x.split(':') for x in self.d['PAYLOAD'].split(';') if ':' in x]}
         except:
             stats.inc_count_errors()
             log(module=__name__, function='process', level='ERROR', msg='DECODE ERROR: QS={0}'.format(self.d['QUERY_STRING']))
