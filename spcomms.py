@@ -105,7 +105,7 @@ from FUNCAUX.UTILS.spc_log import *
 from FUNCAUX.UTILS import spc_stats as stats
 
 
-version = '1.2.0 @ 2022-09-13'
+version = '1.2.5 @ 2022-12-26'
 # -----------------------------------------------------------------------------
 
 
