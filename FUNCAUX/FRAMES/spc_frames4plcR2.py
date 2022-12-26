@@ -36,11 +36,11 @@ class PLCR2_frame(BASE_frame):
 
         self.dlgid = self.d.get('ID', '00000')
         self.version = self.d.get('VER', 'R0.0.0')
-        log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='D={0}</br>'.format(self.d))
+        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='D={0}</br>'.format(self.d))
 
         # El payload debo transformarlo para obtener un diccionario con las variables
         mbk = MEMBLOCK()
-        log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='MBK_DEFINITION={0}</br>'.format(mbk.get_memblock_definition()))
+        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='MBK_DEFINITION={0}</br>'.format(mbk.get_memblock_definition()))
         #
         d_rcvdMbk = mbk.convert_bytes2dict(self.d['PAYLOAD'])
         log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='RCVD_MBK={0}</br>'.format(d_rcvdMbk))
@@ -55,14 +55,14 @@ class PLCR2_frame(BASE_frame):
         # ---------------------------------------------------------------------
         # Dummy Response Testing
         d_dummy = dummy_response_mbk()
-        log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='RSP_D={0}</br>'.format(d_dummy))
+        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_D={0}</br>'.format(d_dummy))
         rsp_payload = mbk.convert_dict2bytes(d_dummy)
         #rsp_payload = b'\x0e\x00\x00\x00\xcd\xcc\xf6Bd\x00\x00\x00\xc3\xf5H@\xcd\xcc,@'
         #rsp_payload = b'\x0e\x00\x00\x00\xcd'
         #rsp_payload = 'HOLA'
         #rsp_payload = b'\x0e\x00\x00\x00\xcd\xbd'
         #rsp_payload = b'ABC'
-        log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg='RSP_MBK={0}</br>'.format(rsp_payload))
+        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_MBK={0}</br>'.format(rsp_payload))
         self.response = rsp_payload
         self.send_response()
         return self.dlgid, self.response

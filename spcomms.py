@@ -15,6 +15,9 @@ ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 
 ----------------------------------------------------------------------------------------------------
+Version 1.2.5 @ 2022-12-26:
+- Ajusto el nivel de los logs para no llenar el disco
+----------------------------------------------------------------------------------------------------
 Version 1.2.4 @ 2022-12-10:
 - Creo una nuevo tipo de frames (SPXR2) para los nuevos dataloggers.
 
@@ -146,7 +149,7 @@ def decode_input ( query_string ):
             payload = payload[:-1]
         d['PAYLOAD'] = payload
         pid = os.getpid()
-        log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
+        log(module=__name__, function='__init__', level='INFO', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
 
     elif ( d['TYPE'] in ['SPXR2'] ):
         # El payload puede terminar en letras cuando trae el cks por lo tanto lo debo procesar en particular.
@@ -157,7 +160,7 @@ def decode_input ( query_string ):
         payload = payload[:-1]
         d['PAYLOAD'] = payload
         pid = os.getpid()
-        log(module=__name__, function='__init__', level='ALERT', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
+        log(module=__name__, function='__init__', level='INFO', msg='PID:{0} RX:[{1}]'.format(pid, query_string))
 
     elif ( d['TYPE'] in ['OCEANUS', 'GENERICO']):
         # El payload esta en el stdin_args del POST
@@ -253,5 +256,5 @@ if __name__ == '__main__':
         log(module=__name__, function='u_send_response', level='ERROR', msg='UNKNOWN FRAME')
         exit(0)
 
-    log(module=__name__, function='__init__', level='ALERT', msg='DLGID:{0}: Process OK: RSP={1}'.format(dlgid, response))
+    log(module=__name__, function='__init__', level='INFO', msg='DLGID:{0}: Process OK: RSP={1}'.format(dlgid, response))
     stats.end()
