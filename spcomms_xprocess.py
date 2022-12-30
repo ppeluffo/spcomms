@@ -2,6 +2,15 @@
 #!/opt/anaconda3/envs/mlearn/bin/python3
 
 '''
+----------------------------------------------------------------------------------------------------
+Version 2.2 @ 2022-12-30:
+Problema: No procesa los SPXV2.
+          Se generan mensajes de error por claves no existentes en la BD
+          'QUERY_STRING', 'CLASS', 'DATE', 'TIME'.
+Solucion: - Se corrigen los nombres.
+          - Antes de llamar a insertar en la BD, se filtra el diccionario y se eliminan dichas claves
+          
+          
 <<<<<<< HEAD
 ----------------------------------------------------------------------------------------------------
 Version 2.1 @ 2022-10-26:
@@ -40,7 +49,7 @@ from FUNCAUX.PROCESS.spc_processSPX import ProcessSPX
 from FUNCAUX.PROCESS.spc_processSP5K import ProcessSP5K
 from FUNCAUX.PROCESS.spc_processOCEANUS import ProcessOCEANUS
 from FUNCAUX.PROCESS.spc_processPLCV2 import ProcessPLCV2
-from FUNCAUX.PROCESS.spc_processSPXV2 import ProcessSPXR2
+from FUNCAUX.PROCESS.spc_processSPXV2 import ProcessSPXV2
 
 MAXPOOLSIZE_SPX=2
 MAXPOOLSIZE_SP5K=2

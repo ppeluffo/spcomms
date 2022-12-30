@@ -3,5 +3,5 @@
 
 from FUNCAUX.PROCESS.spc_processBase import ProcessBASE
 
-class ProcessSPX (ProcessBASE):
+class ProcessSPXV2 (ProcessBASE):
     pass

@@ -13,6 +13,9 @@ El query_string que deben mandar los dispositivos es del tipo:
 ID:PABLO;TYPE:PLC;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SP5K;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
+#
+Para activar el debug selectivo, en el server de REDIS 192.168.0.6 hay que dar un comando del tipo:
+hset 'SPCOMMS' 'DEBUG_DLGID' 'PLCTEST'
 
 ----------------------------------------------------------------------------------------------------
 Version 1.2.5 @ 2022-12-26:
@@ -256,5 +259,5 @@ if __name__ == '__main__':
         log(module=__name__, function='u_send_response', level='ERROR', msg='UNKNOWN FRAME')
         exit(0)
 
-    log(module=__name__, function='__init__', level='INFO', msg='DLGID:{0}: Process OK: RSP={1}'.format(dlgid, response))
+    log(module=__name__, function='__init__', level='INFO', msg='DLGID:{0}: Status OK: RSP={1}'.format(dlgid, response))
     stats.end()

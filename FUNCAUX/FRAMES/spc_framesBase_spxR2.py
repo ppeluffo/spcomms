@@ -65,26 +65,34 @@ class SPXR2_FRAME(BASE_frame):
         self.version = self.d.get('VER', 'R0.0.0')
         self.dict_payload = { k:v for (k, v) in [x.split(':') for x in self.d['PAYLOAD'].split(';') if ':' in x ] }
 
-        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='DEBUG SPXR2_frame')
+        #log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='DEBUG SPXR2_frame')
 
         payload = self.d.get('PAYLOAD','NONE')
-        if 'RECOVER' in payload:
+        #log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg=f'DEBUG PAYLOAD={payload}')
+
+        clase = self.dict_payload.get('CLASS','UNKNOWN')
+
+        if clase == 'RECOVER':
             self.response = self.process_frame_recover()
-        elif 'PING' in payload:
+        elif clase == 'PING':
             self.response = self.process_frame_ping()
-        elif 'CONF_BASE' in payload:
+        elif clase == 'CONF_BASE':
             self.response = self.process_frame_config_base()
-        elif 'CONF_AINPUTS' in payload:
+        elif clase == 'CONF_AINPUTS':
             self.response = self.process_frame_config_ainputs()
-        elif 'CONF_COUNTERS' in payload:
+        elif clase == 'CONF_COUNTERS':
             self.response = self.process_frame_config_counters()
-        elif 'DATA' in payload:
-            self.response = self.process_frame_data()
+        elif clase == 'DATA':
+            self.response = self.process_frame_data('DATA')
+        elif clase == 'BLOCK':
+            self.response = self.process_frame_data('BLOCK')
+        elif clase == 'BLOCKEND':
+            self.response = self.process_frame_data('BLOCKEND')
         else:
             # Frame no reconocido
             self.response = 'ERROR:UNKNOWN FRAME TYPE'
 
-        log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg=f'RSP={self.response}')
+        #log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg=f'RSP={self.response}')
         self.process_response()
         return self.dlgid, self.response
 
@@ -298,7 +306,7 @@ class SPXR2_FRAME(BASE_frame):
         response = 'CLASS:PONG'
         return response
 
-    def process_frame_data(self):
+    def process_frame_data(self, modo='DATA'):
         '''
         Agrego el dict_payload al d y encolo.
 
@@ -306,21 +314,31 @@ class SPXR2_FRAME(BASE_frame):
         GET /cgi-bin/spcomms/spcomms.py?ID:PABLO;TYPE:SPXR2;VER:1.0.0;CLASS:DATA;A0:0.00;A1:0.00;A2:0.00;C0:0.000;C1:0.000
         HTTP/1.1
         Host: www.spymovil.com
+
+        Solo en los modo DATA o BLOCKEND mando respuesta.
+        Esto es para acelarar los envios, que el datalogger no espere al servidor y desagote la memoria rapido.
         '''
         redis_handle = BD_REDIS()
         self.d.update(self.dict_payload)
         redis_handle.enqueue_data_record(self.d, 'LQ_SPXR2DATA')
-        # Preparo la respuesta y transmito. Agrego las órdenes MODBUS para el PLC
-        now=dt.datetime.now().strftime('%y%m%d%H%M')
-        response = f'CLASS:DATA;CLOCK:{now};'
-        # Agrego ordenes que leo del redis.
-        # RESET
-        if redis_handle.get_reset_order(self.dlgid):
-            response += 'RESET;'
-            # Borro el pedido.
-            redis_handle.clear_reset_order(self.dlgid)
+        # Preparo la respuesta y transmito. Agrego las órdenes 
 
-        # RELE STATE
+        #log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg=f'DEBUG process_frame_data1: modo={modo}')
+        if modo in ('DATA', 'BLOCKEND'):
+            #log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg=f'DEBUG process_frame_data2: modo={modo}')
+            now=dt.datetime.now().strftime('%y%m%d%H%M')
+            response = f'CLASS:DATA;CLOCK:{now};'
+            # Agrego ordenes que leo del redis.
+            # RESET
+            if redis_handle.get_reset_order(self.dlgid):
+                response += 'RESET;'
+                # Borro el pedido.
+                redis_handle.clear_reset_order(self.dlgid)
+
+            # RELE STATE ??
+        else:
+            response = None
+        #
         return response
 
 

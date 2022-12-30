@@ -29,16 +29,17 @@ class BASE_frame:
         return
 
     def send_response(self):
-        response = '{}'.format(self.response)
-        try:
-            print('Content-type: text/html\n\n',end='')
-            print('<html><body><h1>{0}</h1></body></html>'.format(response))
-        except Exception as e:
-            stats.inc_count_errors()
-            log(module=__name__, function='u_send_response',level='ERROR',dlgid=self.dlgid,msg='EXCEPTION=[{0}]'.format(e))
-            return
-
-        log(module=__name__, function='send_response',level='SELECT',dlgid=self.dlgid, msg='RSP={0}'.format(response))
+        if self.response is not None:
+            response = '{}'.format(self.response)
+            try:
+                print('Content-type: text/html\n\n',end='')
+                print('<html><body><h1>{0}</h1></body></html>'.format(response))
+            except Exception as e:
+                stats.inc_count_errors()
+                log(module=__name__, function='u_send_response',level='ERROR',dlgid=self.dlgid,msg='EXCEPTION=[{0}]'.format(e))
+                return
+        #
+        #log(module=__name__, function='send_response',level='SELECT',dlgid=self.dlgid, msg='RSP={0}'.format(response))
         return
 
     def process_base(self):

@@ -77,6 +77,10 @@ class ProcessBASE:
                     data = []
                     for pkline in boundle:
                         d = pickle.loads(pkline)
+                        # Debo eliminar los TAGS: QUERY_STRING, CLASS, DATE, TIME
+                        for key in [ 'QUERY_STRING', 'CLASS', 'DATE', 'TIME']:
+                            d.pop(key,None)
+                        #
                         dlgid = d.get('ID', 'SPY000')
                         #log(module=__name__, function='process_queue', level='INFO', msg='pid={0},PKLINE={1}'.format(self.pid, pkline))
                         data.append({'dlgid': dlgid, 'data': d})
