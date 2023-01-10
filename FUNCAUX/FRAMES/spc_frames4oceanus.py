@@ -32,7 +32,7 @@ class OCEANUS_frame(BASE_frame):
         #
         # Guardo el frame el Redis
         self.rh = BD_REDIS()
-        self.rh.enqueue_data_record(self.d, 'LQ_OCEANUSDATA')
+        self.rh.enqueue_data_record(self.dlgid, self.d, 'LQ_OCEANUSDATA')
 
         self.response = 'OK'
         self.process_response()

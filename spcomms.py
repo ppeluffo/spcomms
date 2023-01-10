@@ -16,6 +16,13 @@ ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 #
 Para activar el debug selectivo, en el server de REDIS 192.168.0.6 hay que dar un comando del tipo:
 hset 'SPCOMMS' 'DEBUG_DLGID' 'PLCTEST'
+----------------------------------------------------------------------------------------------------
+Version 1.3.0 @ 2023-01-10:
+- Funciones para procesar datos de los PLCR2.
+  Manejo de memblocks.
+  Process
+  Actualizacion de redis
+  Funciones de uso de la nueva BD PGSQL atvise.
 
 ----------------------------------------------------------------------------------------------------
 Version 1.2.5 @ 2022-12-26:

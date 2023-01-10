@@ -320,7 +320,7 @@ class SPXR2_FRAME(BASE_frame):
         '''
         redis_handle = BD_REDIS()
         self.d.update(self.dict_payload)
-        redis_handle.enqueue_data_record(self.d, 'LQ_SPXR2DATA')
+        redis_handle.enqueue_data_record(self.dlgid, self.d, 'LQ_SPXR2DATA')
         # Preparo la respuesta y transmito. Agrego las órdenes 
 
         #log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg=f'DEBUG process_frame_data1: modo={modo}')

@@ -76,9 +76,9 @@ def process_child(child_type='PLC'):
     elif child_type == 'OCEANUS':
         p = ProcessOCEANUS('LQ_OCEANUSDATA', 'OCEANUS')
     elif child_type == 'PLCV2':
-        p = ProcessOCEANUS('LQ_PLCV2DATA', 'PLCV2')
+        p = ProcessPLCV2('LQ_PLCV2DATA', 'PLCV2')
     elif child_type == 'SPXR2':
-        p = ProcessOCEANUS('LQ_SPXR2DATA', 'SPXR2')
+        p = ProcessSPXV2('LQ_SPXR2DATA', 'SPXR2')
     else:
         log(module=__name__, function='process_child', level='ERROR', msg='ERROR: child_type = {0}'.format(child_type))
         return
@@ -153,10 +153,8 @@ if __name__ == '__main__':
     # Arranco el proceso que maneja los inits
     config_logger('XPROCESS')
     log(module=__name__, function='__init__', level='ALERT', msg='XPROCESS START')
-    log(module=__name__, function='__init__', level='ALERT',
-        msg='XPROCESS: Redis server={0}'.format(Config['REDIS']['host']))
-    log(module=__name__, function='__init__', level='ALERT',
-        msg='XPROCESS: GDA url={0}'.format(Config['BDATOS']['url_gda_spymovil']))
+    log(module=__name__, function='__init__', level='ALERT', msg='XPROCESS: Redis server={0}'.format(Config['REDIS']['host']))
+    log(module=__name__, function='__init__', level='ALERT', msg='XPROCESS: GDA url={0}'.format(Config['BDATOS']['url_gda_spymovil']))
     p1 = Process(target=process_master)
     p1.start()
 

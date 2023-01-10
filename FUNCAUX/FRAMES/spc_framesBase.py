@@ -61,13 +61,13 @@ class BASE_frame:
         # Encolo: cada tipo tiene una cola distinta
         device_type = self.d.get('TYPE', 'UNKNOWN')
         if device_type == 'PLC':
-            self.rh.enqueue_data_record(self.d, 'LQ_PLCDATA')
+            self.rh.enqueue_data_record(self.dlgid, self.d, 'LQ_PLCDATA')
         elif device_type == 'PLCPAY':
-            self.rh.enqueue_data_record(self.d, 'LQ_PLCPAYDATA')
+            self.rh.enqueue_data_record(self.dlgid, self.d, 'LQ_PLCPAYDATA')
         elif device_type == 'SPX':
-            self.rh.enqueue_data_record(self.d, 'LQ_SPXDATA')
+            self.rh.enqueue_data_record(self.dlgid, self.d, 'LQ_SPXDATA')
         elif device_type == 'SP5K':
-            self.rh.enqueue_data_record(self.d, 'LQ_SP5KDATA')
+            self.rh.enqueue_data_record(self.dlgid, self.d, 'LQ_SP5KDATA')
 
         # Preparo la respuesta y transmito. Agrego las órdenes MODBUS para el PLC
         self.response += '{};'.format(dt.datetime.now().strftime('%y%m%d%H%M'))
