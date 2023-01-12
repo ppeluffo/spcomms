@@ -17,8 +17,11 @@ if __name__ == '__main__':
     print('Testing SPYPLCR2....')
     sendframes = SENDFRAMES()
     sendframes.set_type('PLCR2')
+    #sendframes.set_dlgid('PPOTKIYU')
     sendframes.set_dlgid('PLCTEST')
     sendframes.set_cgi_type('POST')
+    #sendframes.set_server('192.168.0.9')
+    #sendframes.set_path('COMMS')
     #sendframes.prepare_random_payload()
     sendframes.send()
     # Summary:

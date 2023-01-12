@@ -19,7 +19,7 @@ pip install -U pymodbus
 
 from collections import namedtuple
 from struct import *
-#from FUNCAUX.UTILS.spc_log import log
+from FUNCAUX.UTILS.spc_log import log
 from pymodbus.utilities import computeCRC
 from FUNCAUX.BD.spc_bd_redis import BD_REDIS
 
@@ -247,6 +247,7 @@ class MEMBLOCK:
         self.s_mbk_sformat, self.s_mbk_largo, names = process(self.d_mbk['SEND_MBK_DEF'])
         self.s_mbk_ntuple = namedtuple('SEND_VARS_NAMES', names)                # nombres de c/variable
         self.s_mbk_d_vars = { i:k for i,j,k,*rest in self.d_mbk['SEND_MBK_DEF']}    # Diccionario con las variables a usar
+
         return
 
     def payload_crc_valid(self, payload: bytearray):
@@ -285,7 +286,7 @@ class MEMBLOCK:
         d_vars = mem_block._asdict()
         return d_vars
 
-    def convert_dict2bytes( self, d_data ):
+    def convert_dict2bytes( self, dlgid, d_data ):
         '''
         Recibo un diccionario con variables definidas en la estructura de un plc memblock.
         Utiliza el s_mbk ( SEND )
@@ -305,8 +306,16 @@ class MEMBLOCK:
         # Convierto el diccionario a una namedtuple (template)
         ntuple = self.s_mbk_ntuple(**self.s_mbk_d_vars)
         # Convierto la ntuple a un bytearray serializado
-        payload = pack( self.s_mbk_sformat, *ntuple)
-        
+        try:
+            payload = pack( self.s_mbk_sformat, *ntuple)
+        except:
+            log(module=__name__,function='convert_dict2bytes', level='ERROR', dlgid=dlgid, msg='pack ERROR:')
+            log(module=__name__,function='convert_dict2bytes', level='ERROR', dlgid=dlgid, msg=f's_mbk_sformat={self.s_mbk_sformat}')
+            log(module=__name__,function='convert_dict2bytes', level='ERROR', dlgid=dlgid, msg=f's_mbk_d_vars={self.s_mbk_d_vars}')
+            log(module=__name__,function='convert_dict2bytes', level='ERROR', dlgid=dlgid, msg=f'ntuple={ntuple}')
+            return None
+
+
         # Controlo errores: el payload no puede ser mas largo que el tamaño del bloque (frame)
         if len(payload) > self.d_mbk['SEND_MBK_LENGTH']:
             return None

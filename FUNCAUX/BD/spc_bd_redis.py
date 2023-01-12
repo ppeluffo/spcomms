@@ -601,7 +601,7 @@ class BD_REDIS:
             return None
 
         value = d_datos.get(var_name_remoto, -99)
-        return value
+        return float(value)
 
     def get_memblock(self, dlgid):
         '''

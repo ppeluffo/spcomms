@@ -96,7 +96,7 @@ class PLCR2_frame(BASE_frame):
 
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_D={0}'.format(d_responses))
         # Armo el bloque de respuestas a enviar apareando el d_responses con el mbk dando como resultado un rsp_dict.
-        rsp_dict, rsp_payload = mbk.convert_dict2bytes(d_responses)
+        rsp_dict, rsp_payload = mbk.convert_dict2bytes(self.dlgid, d_responses)
 
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_DICT={0}'.format(rsp_dict))
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_MBK={0}'.format(rsp_payload))
