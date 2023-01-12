@@ -558,6 +558,7 @@ class BD_REDIS:
 
         if remotes_vars_pkline != b'NUL':
             d_remotes_vars = pickle.loads(remotes_vars_pkline)
+            log(module=__name__, function='get_d_remotes_vars', level='SELECT', dlgid=dlgid, msg=f'D_REM_VARS={d_remotes_vars}')
             return d_remotes_vars
         else:
             # Lo debo leer de la base persistente
@@ -574,6 +575,7 @@ class BD_REDIS:
                 d_remotes_vars=d_conf['REMVARS']
                 remotes_vars_pkline = pickle.dumps(d_remotes_vars)
                 self.handle.hset(dlgid, 'REMVARS', remotes_vars_pkline)
+                log(module=__name__, function='get_d_remotes_vars', level='SELECT', dlgid=dlgid, msg=f'D_REM_VARS(BD)={d_remotes_vars}')
                 #
                 return d_remotes_vars
 
@@ -628,26 +630,27 @@ class BD_REDIS:
             stats.inc_count_errors()
             return None
 
-        if mbk_pkline != b'NUL':
-            d_mbk = pickle.loads(mbk_pkline)
-            return d_mbk
-        else:
+        if mbk_pkline == b'NUL':
             # Lo debo leer de la base persistente
             atv=BD_ATVISE()
             d_conf=atv.read_plc_conf(dlgid)
             if d_conf is None:
                 log(module=__name__, function='read_memblock', level='ERROR', dlgid=dlgid, msg='ERROR: Conf in PGSQL is None !!!')
                 return None
-            else:
-                # Guardo la configuracion en REDIS para la proxima vez
-                d_memblocks=d_conf['MEMBLOCK']
-                mbk_pkline = pickle.dumps(d_memblocks)
-                self.handle.hset(dlgid, 'MEMBLOCK', mbk_pkline)
-                d_remotes_vars=d_conf['REMVARS']
-                remotes_vars_pkline = pickle.dumps(d_remotes_vars)
-                self.handle.hset(dlgid, 'REMVARS', remotes_vars_pkline)
-                #
-                return d_memblocks
+
+            # Guardo la configuracion en REDIS para la proxima vez
+            print(d_conf)
+            d_memblocks=d_conf['MEMBLOCK']
+            mbk_pkline = pickle.dumps(d_memblocks)
+            self.handle.hset(dlgid, 'MEMBLOCK', mbk_pkline)
+            d_remotes_vars=d_conf['REMVARS']
+            remotes_vars_pkline = pickle.dumps(d_remotes_vars)
+            self.handle.hset(dlgid, 'REMVARS', remotes_vars_pkline)
+            #
+            return d_memblocks
+        else:
+            d_mbk = pickle.loads(mbk_pkline)
+            return d_mbk
 
         return None
 
@@ -681,6 +684,7 @@ class BD_REDIS:
 
         if d_rsp_pkline != b'NUL':
             d_rsp = pickle.loads(d_rsp_pkline)
+            self.handle.hset(dlgid, 'ATVISE', 'NUL')
             return d_rsp
 
         return {}

@@ -29,119 +29,106 @@ MBK_KIYU = { 'RCVD_MBK_LENGTH': 21, 'RCVD_MBK_DEF': [   ('var1','uchar',0), ('va
              'SEND_MBK_LENGTH': 21, 'SEND_MBK_DEF': [   ('var1','uchar',0), ('var2','uchar',1), ('var3','float',2), ('var4','short',3), ('var5','short',5)],
            }
 
-MBK_KIYU2 = { 'RCVD_MBK_LENGTH': 151, 'RCVD_MBK_DEF':
-[
-('UPA1_CAUDALIMETRO', 'float',0),
-('UPA1_DUMMY1', 'uchar', 1),
-('UPA1_DUMMY2', 'uchar', 1),
-('UPA1_STATE1', 'uchar', 1),
-('UPA1_STATE2', 'uchar', 2),
-('UPA1_STATE3', 'uchar', 3),
-('UPA1_STATE4', 'uchar', 4),
-('UPA1_STATE5', 'uchar', 5),
-('UPA1_STATE6', 'uchar', 6),
-('UPA1_STATE7', 'uchar', 7),
-('UPA1_POS_ACTUAL_6', 'short', 8),
-('UPA1_POS_ACTUAL_7','short', 9),
-
-('UPA2_CAUDALIMETRO', 'float',0),
-('UPA2_DUMMY1', 'uchar', 1),
-('UPA2_DUMMY2', 'uchar', 1),
-('UPA2_STATE1', 'uchar', 1),
-('UPA2_STATE2', 'uchar', 2),
-('UPA2_STATE3', 'uchar', 3),
-('UPA2_STATE4', 'uchar', 4),
-('UPA2_STATE5', 'uchar', 5),
-('UPA2_STATE6', 'uchar', 6),
-('UPA2_STATE7', 'uchar', 7),
-('UPA2_POS_ACTUAL_6', 'short', 8),
-('UPA2_POS_ACTUAL_7','short', 9),
-
-('UPA3_CAUDALIMETRO', 'float',0),
-('UPA3_DUMMY1', 'uchar', 1),
-('UPA3_DUMMY2', 'uchar', 1),
-('UPA3_STATE1', 'uchar', 1),
-('UPA3_STATE2', 'uchar', 2),
-('UPA3_STATE3', 'uchar', 3),
-('UPA3_STATE4', 'uchar', 4),
-('UPA3_STATE5', 'uchar', 5),
-('UPA3_STATE6', 'uchar', 6),
-('UPA3_STATE7', 'uchar', 7),
-('UPA3_POS_ACTUAL_6', 'short', 8),
-('UPA3_POS_ACTUAL_7', 'short', 9),
-
-('ESP_CAUDALIMETRO', 'float',0),
-('ESP_SENSOR_NIVEL_POZO', 'short', 9),
-('ESP_STATE1', 'uchar', 1),
-('ESP_STATE2', 'uchar', 1),
-('ESP_STATE3', 'uchar', 1),
-('ESP_STATE4', 'uchar', 1),
-('ESP_STATE5', 'uchar', 1),
-('ESP_STATE6', 'uchar', 1),
-('ESP_STATE7', 'uchar', 1),
-('ESP_STATE8', 'uchar', 1),
-
-('TQ_NIVEL_CLARA', 'short', 1),
-('TQ_NIVEL_BRUTA', 'short', 1),
-
-('BMB_STATE1', 'uchar', 1),
-('BMB_STATE2', 'uchar', 1),
-('BMB_STATE3', 'uchar', 1),
-('BMB_STATE4', 'uchar', 1),
-('BMB_STATE5', 'uchar', 1),
-('BMB_STATE6', 'uchar', 1),
-('BMB_STATE7', 'uchar', 1),
-('BMB_STATE8', 'uchar', 1),
-('BMB_STATE9', 'uchar', 1),
-('BMB_STATE10', 'uchar', 1),
-('BMB_STATE11', 'uchar', 1),
-('BMB_STATE12', 'uchar', 1),
-('BMB_STATE13', 'uchar', 1),
-('BMB_STATE14', 'uchar', 1),
-('BMB_STATE15', 'uchar', 1),
-('BMB_STATE16', 'uchar', 1),
-('BMB_STATE17', 'uchar', 1),
-('BMB_STATE18', 'uchar', 1),
-('BMB_STATE19', 'uchar', 1),
-],
-'SEND_MBK_LENGTH': 151, 'SEND_MBK_DEF':
-[
-('UPA1_ORDER_1', 'short', 1),
-('UPA1_ORDER_2', 'short', 1),
-('UPA1_ORDER_3', 'short', 1),
-('UPA1_ORDER_4', 'short', 1),
-('UPA1_ORDER_5', 'short', 1),
-('UPA1_CONSIGNA_6', 'short', 1),
-('UPA1_CONSIGNA_7', 'short', 1),
-
-('UPA2_ORDER_1', 'short', 1),
-('UPA2_ORDER_2', 'short', 1),
-('UPA2_ORDER_3', 'short', 1),
-('UPA2_ORDER_4', 'short', 1),
-('UPA2_ORDER_5', 'short', 1),
-('UPA2_CONSIGNA_6', 'short', 1),
-('UPA2_CONSIGNA_7', 'short', 1),
-
-('UPA3_ORDER_1', 'short', 1),
-('UPA3_ORDER_2', 'short', 1),
-('UPA3_ORDER_3', 'short', 1),
-('UPA3_ORDER_4', 'short', 1),
-('UPA3_ORDER_5', 'short', 1),
-('UPA3_CONSIGNA_6', 'short', 1),
-('UPA3_CONSIGNA_7', 'short', 1),
-
-('ESP_ORDER_1', 'short', 1),
-('ESP_ORDER_2', 'short', 1),
-('ESP_ORDER_3', 'short', 1),
-('ESP_ORDER_4', 'short', 1),
-('ESP_ORDER_5', 'short', 1),
-('ESP_ORDER_6', 'short', 1),
-('ESP_ORDER_7', 'short', 1),
-('ESP_ORDER_8', 'short', 1),
-
-('NIVEL_TQ_KIYU', 'float', 1),
-],
- }
+MBK_KIYU2 = {'REMVARS': {'KYTQ003': [['HTQ1', 'NIVEL_TQ_KIYU']]},
+ 'MEMBLOCK': {'RCVD_MBK_DEF': [['UPA1_CAUDALIMETRO', 'float', 0],
+   ['UPA1_DUMMY1', 'uchar', 1],
+   ['UPA1_DUMMY2', 'uchar', 1],
+   ['UPA1_STATE1', 'uchar', 1],
+   ['UPA1_STATE2', 'uchar', 2],
+   ['UPA1_STATE3', 'uchar', 3],
+   ['UPA1_STATE4', 'uchar', 4],
+   ['UPA1_STATE5', 'uchar', 5],
+   ['UPA1_STATE6', 'uchar', 6],
+   ['UPA1_STATE7', 'uchar', 7],
+   ['UPA1_POS_ACTUAL_6', 'short', 8],
+   ['UPA1_POS_ACTUAL_7', 'short', 9],
+   ['UPA2_CAUDALIMETRO', 'float', 0],
+   ['UPA2_DUMMY1', 'uchar', 1],
+   ['UPA2_DUMMY2', 'uchar', 1],
+   ['UPA2_STATE1', 'uchar', 1],
+   ['UPA2_STATE2', 'uchar', 2],
+   ['UPA2_STATE3', 'uchar', 3],
+   ['UPA2_STATE4', 'uchar', 4],
+   ['UPA2_STATE5', 'uchar', 5],
+   ['UPA2_STATE6', 'uchar', 6],
+   ['UPA2_STATE7', 'uchar', 7],
+   ['UPA2_POS_ACTUAL_6', 'short', 8],
+   ['UPA2_POS_ACTUAL_7', 'short', 9],
+   ['UPA3_CAUDALIMETRO', 'float', 0],
+   ['UPA3_DUMMY1', 'uchar', 1],
+   ['UPA3_DUMMY2', 'uchar', 1],
+   ['UPA3_STATE1', 'uchar', 1],
+   ['UPA3_STATE2', 'uchar', 2],
+   ['UPA3_STATE3', 'uchar', 3],
+   ['UPA3_STATE4', 'uchar', 4],
+   ['UPA3_STATE5', 'uchar', 5],
+   ['UPA3_STATE6', 'uchar', 6],
+   ['UPA3_STATE7', 'uchar', 7],
+   ['UPA3_POS_ACTUAL_6', 'short', 8],
+   ['UPA3_POS_ACTUAL_7', 'short', 9],
+   ['ESP_CAUDALIMETRO', 'float', 0],
+   ['ESP_SENSOR_NIVEL_POZO', 'short', 9],
+   ['ESP_STATE1', 'uchar', 1],
+   ['ESP_STATE2', 'uchar', 1],
+   ['ESP_STATE3', 'uchar', 1],
+   ['ESP_STATE4', 'uchar', 1],
+   ['ESP_STATE5', 'uchar', 1],
+   ['ESP_STATE6', 'uchar', 1],
+   ['ESP_STATE7', 'uchar', 1],
+   ['ESP_STATE8', 'uchar', 1],
+   ['TQ_NIVEL_CLARA', 'short', 1],
+   ['TQ_NIVEL_BRUTA', 'short', 1],
+   ['BMB_STATE1', 'uchar', 1],
+   ['BMB_STATE2', 'uchar', 1],
+   ['BMB_STATE3', 'uchar', 1],
+   ['BMB_STATE4', 'uchar', 1],
+   ['BMB_STATE5', 'uchar', 1],
+   ['BMB_STATE6', 'uchar', 1],
+   ['BMB_STATE7', 'uchar', 1],
+   ['BMB_STATE8', 'uchar', 1],
+   ['BMB_STATE9', 'uchar', 1],
+   ['BMB_STATE10', 'uchar', 1],
+   ['BMB_STATE11', 'uchar', 1],
+   ['BMB_STATE12', 'uchar', 1],
+   ['BMB_STATE13', 'uchar', 1],
+   ['BMB_STATE14', 'uchar', 1],
+   ['BMB_STATE15', 'uchar', 1],
+   ['BMB_STATE16', 'uchar', 1],
+   ['BMB_STATE17', 'uchar', 1],
+   ['BMB_STATE18', 'uchar', 1],
+   ['BMB_STATE19', 'uchar', 1]],
+  'SEND_MBK_DEF': [['UPA1_ORDER_1', 'short', 1],
+   ['UPA1_ORDER_2', 'short', 200],
+   ['UPA1_ORDER_3', 'short', 200],
+   ['UPA1_ORDER_4', 'short', 200],
+   ['UPA1_ORDER_5', 'short', 200],
+   ['UPA1_CONSIGNA_6', 'short', 2560],
+   ['UPA1_CONSIGNA_7', 'short', 2560],
+   ['UPA2_ORDER_1', 'short', 200],
+   ['UPA2_ORDER_2', 'short', 200],
+   ['UPA2_ORDER_3', 'short', 200],
+   ['UPA2_ORDER_4', 'short', 200],
+   ['UPA2_ORDER_5', 'short', 200],
+   ['UPA2_CONSIGNA_6', 'short', 2560],
+   ['UPA2_CONSIGNA_7', 'short', 2560],
+   ['UPA3_ORDER_1', 'short', 200],
+   ['UPA3_ORDER_2', 'short', 200],
+   ['UPA3_ORDER_3', 'short', 200],
+   ['UPA3_ORDER_4', 'short', 200],
+   ['UPA3_ORDER_5', 'short', 200],
+   ['UPA3_CONSIGNA_6', 'short', 2560],
+   ['UPA3_CONSIGNA_7', 'short', 2560],
+   ['ESP_ORDER_1', 'short', 200],
+   ['ESP_ORDER_2', 'short', 200],
+   ['ESP_ORDER_3', 'short', 200],
+   ['ESP_ORDER_4', 'short', 200],
+   ['ESP_ORDER_5', 'short', 200],
+   ['ESP_ORDER_6', 'short', 200],
+   ['ESP_ORDER_7', 'short', 200],
+   ['ESP_ORDER_8', 'short', 200],
+   ['NIVEL_TQ_KIYU', 'float', 2560]],
+  'RCVD_MBK_LENGTH': 151,
+  'SEND_MBK_LENGTH': 151}}
 
 
 class MEMBLOCK:
@@ -192,7 +179,7 @@ class MEMBLOCK:
 
     def reset_mbk(self):
         '''
-        Reinicia el formato de la struct del memblock
+        Reinicia el formato local (self) de la struct del memblock
         '''
         self.d_mbk = None
         self.r_mbk_largo = 0
@@ -211,6 +198,12 @@ class MEMBLOCK:
         https://docs.python.org/es/3/library/struct.html#module-struct
         V1.0: Solo admitimos
         CHAR: 1, SHORT (2), INT (4), FLOAT (4)
+
+        El sformat es un string con el codigo (caracter) que define cada campo del memblock
+        Se utiliza para decodificar el bytearray. 
+        El largo es la cantidad de bytes que ocupa el memblock
+        Names es una lista de nombres de las variables para que al decodificar el memblock de acuerdo al sformat
+        se asignen los valores a los nombres indicados en la lista ( en el mismo orden )
         '''
         if self.r_mbk_sformat is not None and not force:
             return
@@ -253,7 +246,7 @@ class MEMBLOCK:
 
         self.s_mbk_sformat, self.s_mbk_largo, names = process(self.d_mbk['SEND_MBK_DEF'])
         self.s_mbk_ntuple = namedtuple('SEND_VARS_NAMES', names)                # nombres de c/variable
-        self.s_mbk_d_vars = { i:0 for i,*rest in self.d_mbk['SEND_MBK_DEF']}    # Diccionario con las variables a usar
+        self.s_mbk_d_vars = { i:k for i,j,k,*rest in self.d_mbk['SEND_MBK_DEF']}    # Diccionario con las variables a usar
         return
 
     def payload_crc_valid(self, payload: bytearray):
@@ -305,8 +298,10 @@ class MEMBLOCK:
         # Calculo los componentes del memblock
         self.process_mbk()
         # Apareo el d_data con el self.mbk_d_vars.
+        # Si la variable NO está en d_data, pongo el valor por defecto leido del memblock.
         for key in self.s_mbk_d_vars:
-            self.s_mbk_d_vars[key] = d_data.get(key,0)
+            default_value = self.s_mbk_d_vars[key]
+            self.s_mbk_d_vars[key] = d_data.get(key,default_value)
         # Convierto el diccionario a una namedtuple (template)
         ntuple = self.s_mbk_ntuple(**self.s_mbk_d_vars)
         # Convierto la ntuple a un bytearray serializado

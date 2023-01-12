@@ -83,6 +83,7 @@ class PLCR2_frame(BASE_frame):
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_D_REM={0}'.format(d_responses))
 
         # Leo las variables de la API del ATVISE y las agrego al diccionario de respuestas
+        # Las mismas estan en modo pickle en la key ATVISE de REDIS.
         # ---------------------------------------------------------------------
         d_atvise_responses = self.rh.get_atvise_responses(self.dlgid)
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_D_ATV={0}'.format(d_atvise_responses))
