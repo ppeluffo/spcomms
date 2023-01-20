@@ -117,7 +117,7 @@ class BD_REDIS:
             stats.inc_count_errors()
             return False
 
-        self.handle.rpush('LQUEUE_STATS', pkdict)
+        # self.handle.rpush('LQUEUE_STATS', pkdict)
         return True
 
     def invalidate_record(self, dlgid):
