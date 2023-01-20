@@ -50,6 +50,8 @@ class BD_ATVISE:
             log(module=__name__, function='exec_sql', level='ERROR', dlgid=dlgid, msg='ERROR: No hay conexion a BD. Exit !!')
             return None
 
+        #log(module=__name__, function='exec_sql', level='ERROR', dlgid=dlgid, msg='SQLQUERY: {0}'.format(sql))
+
         try:
             query = text(sql)
         except Exception as err_var:
@@ -57,7 +59,7 @@ class BD_ATVISE:
             log(module=__name__, function='exec_sql', level='ERROR', dlgid=dlgid, msg='ERROR: EXCEPTION {0}'.format(err_var))
             return
 
-        log(module=__name__, function='exec_sql', level='SELECT', dlgid=dlgid, msg='QUERY={0}'.format(query))
+        #log(module=__name__, function='exec_sql', level='SELECT', dlgid=dlgid, msg='QUERY={0}'.format(query))
         rp = None
         try:
             rp = self.conn.execute(query)
@@ -98,35 +100,30 @@ class BD_ATVISE:
         else:
             return None
 
-    def insert_plcR2_data(self, data):
-        # Retorna un resultProxy o None
-        # Data es una lista de diccionarios.
-        sql = """INSERT INTO db_datos (fechadata, equipo, tag, valor) VALUES """
-
-        for d_data in data:
-            dlgid = d_data['dlgid']
-            d_vals = d_data['data']
-
+    def insert_plcR2_data(self, d:dict):
+        '''
+        Recibe un diccionario donde la clave 'ID' es el dlgid.
+        El resto de las claves son los nombres de las variables.
+        Retorna un resultProxy o None
+        Data es una lista de diccionarios.
+        '''
+        dlgid=d.get('ID','SPY000')
+        if 'ID' in d:
+            d.pop('ID')
+        #log(module=__name__, function='insert_plcR2_data', level='SELECT', dlgid=dlgid, msg='Start')
+        for key in d:
             # Inserta cada par key_value
-            log(module=__name__, function='insert_plcR2_data', level='SELECT', dlgid=dlgid, msg='Start')
+            value = d.get(key, 'None')
+            if value != 'None':
+                try:
+                    fvalue = float(value)
+                except:
+                    fvalue = np.NaN
 
-            for key in d_vals:
-                if key in ['ID', 'TYPE', 'RCVD', 'VER', 'PAYLOAD']:
-                    continue
-                value = d_vals.get(key, 'None')
-                if value != 'None':
-                    try:
-                        fvalue = float(value)
-                    except:
-                        fvalue = np.NaN
-
-                sql += """( NOW(),'{0}', '{1}', '{2}')""".format(dlgid, key, fvalue)
-
+            sql = """INSERT INTO db_datos (fechadata, equipo, tag, valor) VALUES ( NOW(),'{0}', '{1}', '{2}')""".format(dlgid, key, fvalue)
+            #
+            result = self.exec_sql(dlgid, sql)
+            if result is None:
+                log(module=__name__, function='insert_plcR2_data', level='ERROR', dlgid=dlgid, msg='INSERT PG_ATVISE FAIL.')
         #
-        result = self.exec_sql(dlgid, sql)
-        if result is None:
-            log(module=__name__, function='insert_plcR2_data', level='ERROR', dlgid=dlgid, msg='End FAIL.')
-            return False
-        else:
-            log(module=__name__, function='insert_plcR2_data', level='SELECT', dlgid=dlgid, msg='End OK')
-            return True
+        return True

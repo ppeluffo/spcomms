@@ -13,6 +13,7 @@ from FUNCAUX.UTILS.spc_log import log
 from FUNCAUX.UTILS.spc_memblocks import MEMBLOCK
 from FUNCAUX.BD.spc_bd_redis import BD_REDIS
 import sys
+from datetime import datetime
 
 REMOTOS = { 'KIYU001':[('HTQ1', 'ALTURA_TANQUE_KIYU_1'), ('HTQ2', 'ALTURA_TANQUE_KIYU_2')],
             'SJOSE001' : [ ('PA', 'PRESION_ALTA_SJ1'), ('PB', 'PRESION_BAJA_SQ1')]
@@ -57,8 +58,11 @@ class PLCR2_frame(BASE_frame):
         #
         # ---------------------------------------------------------------------
         # RECEPCION DE DATOS DEL PLC
+        # El d_rcvd_data solo tiene las variables del PAYLOAD del POST o sea que no tiene ID,VER, etc.
+        # Debemos ponerle un 'ID' para que el desencolarlo, el process pueda ponerlo en la BD correctamente.
         # ---------------------------------------------------------------------
         d_rcvd_data = mbk.convert_bytes2dict(self.d['PAYLOAD'])
+        d_rcvd_data['ID'] = self.dlgid
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RCVD_D_DATA={0}'.format(d_rcvd_data))
         #
         # Guardo el frame el Redis
@@ -79,6 +83,12 @@ class PLCR2_frame(BASE_frame):
             for var_name_remoto, var_name_central in var_list:
                 rem_value = self.rh.get_remote_var_value(dlgid, var_name_remoto)
                 d_responses[var_name_central] = rem_value
+
+        # Agrego una nueva variable que es el timestamp HHMM que sirve para que el PLC pueda tener
+        # contol si el enlace cayo y los valores de las variables caducaron.
+        now = datetime.now()
+        now_str = now.strftime("%H%M")
+        d_responses['TIMESTAMP'] = int(now_str)
 
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='RSP_D_REM={0}'.format(d_responses))
 

@@ -48,7 +48,7 @@ from FUNCAUX.PROCESS.spc_processPLCPAY import ProcessPLCPAY
 from FUNCAUX.PROCESS.spc_processSPX import ProcessSPX
 from FUNCAUX.PROCESS.spc_processSP5K import ProcessSP5K
 from FUNCAUX.PROCESS.spc_processOCEANUS import ProcessOCEANUS
-from FUNCAUX.PROCESS.spc_processPLCV2 import ProcessPLCV2
+from FUNCAUX.PROCESS.spc_processPLCR2 import ProcessPLCR2
 from FUNCAUX.PROCESS.spc_processSPXV2 import ProcessSPXV2
 
 MAXPOOLSIZE_SPX=2
@@ -56,7 +56,7 @@ MAXPOOLSIZE_SP5K=2
 MAXPOOLSIZE_PLC=2
 MAXPOOLSIZE_PLCPAY=2
 MAXPOOLSIZE_OCEANUS=2
-MAXPOOLSIZE_PLCV2=2
+MAXPOOLSIZE_PLCR2=2
 MAXPOOLSIZE_SPXV2=2
 
 DATABOUNDLESIZE=50
@@ -75,8 +75,8 @@ def process_child(child_type='PLC'):
         p = ProcessSP5K('LQ_SP5KDATA', 'SP5K')
     elif child_type == 'OCEANUS':
         p = ProcessOCEANUS('LQ_OCEANUSDATA', 'OCEANUS')
-    elif child_type == 'PLCV2':
-        p = ProcessPLCV2('LQ_PLCV2DATA', 'PLCV2')
+    elif child_type == 'PLCR2':
+        p = ProcessPLCR2('LQ_PLCR2DATA', 'PLCR2')
     elif child_type == 'SPXR2':
         p = ProcessSPXV2('LQ_SPXR2DATA', 'SPXR2')
     else:
@@ -111,11 +111,11 @@ def process_master():
     plist_plc = []
     plist_plcpay = []
     plist_oceanus = []
-    plist_plcV2 = []
+    plist_plcR2 = []
     plist_spxR2 = []
-    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay, plist_oceanus, plist_plcV2, plist_spxR2 ]
-    child_types = ['SPX','SP5K', 'PLC','PLCPAY','OCEANUS', 'PLCV2', 'SPXR2']
-    process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS, MAXPOOLSIZE_PLCV2, MAXPOOLSIZE_SPXV2 ]
+    process_list = [plist_spx, plist_sp5k, plist_plc, plist_plcpay, plist_oceanus, plist_plcR2, plist_spxR2 ]
+    child_types = ['SPX','SP5K', 'PLC','PLCPAY','OCEANUS', 'PLCR2', 'SPXR2']
+    process_poolsizes = [ MAXPOOLSIZE_SPX, MAXPOOLSIZE_SP5K, MAXPOOLSIZE_PLC, MAXPOOLSIZE_PLCPAY, MAXPOOLSIZE_OCEANUS, MAXPOOLSIZE_PLCR2, MAXPOOLSIZE_SPXV2 ]
     #logger.info(plist)
     # Creo todos los procesos child.
     for plist, child_type, poolsize in zip( process_list, child_types, process_poolsizes ):

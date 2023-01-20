@@ -13,7 +13,7 @@ from FUNCAUX.UTILS import spc_stats as stats
 
 DATABOUNDLESIZE = 50
 
-class ProcessPLCV2:
+class ProcessPLCR2:
 
     def __init__(self, queue_name, tipo=None ):
         self.pid = os.getpid()
@@ -29,6 +29,8 @@ class ProcessPLCV2:
         '''
         Lee un bundle de lineas de redis.
         Si esta vacia, espera
+        No tengo el dlgid !!!.
+        Las lineas solo tiene las key 'ID' y los nombres de las variables(muchas)
         '''
         while True:
             boundle = self.rh.lpop_lqueue(self.queue_name, DATABOUNDLESIZE)
@@ -39,18 +41,15 @@ class ProcessPLCV2:
                     start = time.perf_counter()
                     stats.init()
                     log(module=__name__, function='process_queue', level='INFO', msg='{0}: ({1}) process_queue: RQsize={2}'.format(self.tipo, self.pid, qsize))
-                    data = []
                     for pkline in boundle:
                         d = pickle.loads(pkline)
-                        # Debo eliminar los TAGS: QUERY_STRING, CLASS, DATE, TIME
-                        for key in [ 'QUERY_STRING', 'CLASS', 'DATE', 'TIME','VER']:
-                            d.pop(key,None)
+                        if not isinstance(d, dict):
+                            continue
                         #
-                        dlgid = d.get('ID', 'SPY000')
                         #log(module=__name__, function='process_queue', level='INFO', msg='pid={0},PKLINE={1}'.format(self.pid, pkline))
-                        data.append({'dlgid': dlgid, 'data': d})
-                    # Inserto
-                    self.bdatvise.insert_plcR2_data(data)
+                        # Inserto
+                        #log(module=__name__, function='process_queue', level='ERROR', msg='D={0}'.format(d))
+                        self.bdatvise.insert_plcR2_data(d)
 
                     # Fin del procesamiento del bundle
                     elapsed = time.perf_counter() - start
