@@ -215,36 +215,40 @@ class MEMBLOCK:
             names = ''
             for ( name, tipo, _) in l_mbk_def:
                 names += f'{name} '
-                if tipo == 'char':
+                if tipo.lower() == 'char':
                     sformat += 'c'
                     largo += 1
-                elif tipo == 'schar':
+                elif tipo.lower() == 'schar':
                     sformat += 'b'
                     largo += 1
-                elif tipo == 'uchar':
+                elif tipo.lower() == 'uchar':
                     sformat += 'B'
                     largo += 1
-                elif tipo == 'short':
+                elif tipo.lower() == 'short':
                     sformat += 'h'
                     largo += 2
-                elif tipo == 'int':
+                elif tipo.lower() == 'int':
                     sformat += 'i'
                     largo += 4
-                elif tipo == 'float':
+                elif tipo.lower() == 'float':
                     sformat += 'f'
                     largo += 4
-                elif tipo == 'unsigned':
+                elif tipo.lower() == 'unsigned':
                     sformat += 'H'
                     largo += 2
                 else:
-                    sformat = '?'
+                    sformat += '?'
             return sformat, largo, names
 
         self.r_mbk_sformat, self.r_mbk_largo, names = process(self.d_mbk['RCVD_MBK_DEF'])
+        log(module=__name__, function='process_mbk', level='ERROR', msg='r_mbk_sformat={0}, d_mbk={1}, names={2}'.format(self.r_mbk_sformat, self.d_mbk, names))
+
         self.r_mbk_ntuple = namedtuple('RCVD_VARS_NAMES', names)                # nombres de c/variable
         self.r_mbk_d_vars = { i:0 for i,*rest in self.d_mbk['RCVD_MBK_DEF']}    # Diccionario con las variables a usar
 
         self.s_mbk_sformat, self.s_mbk_largo, names = process(self.d_mbk['SEND_MBK_DEF'])
+        log(module=__name__, function='process_mbk', level='ERROR', msg='s_mbk_sformat={0}, d_mbk={1}'.format(self.s_mbk_sformat, self.d_mbk))
+
         self.s_mbk_ntuple = namedtuple('SEND_VARS_NAMES', names)                # nombres de c/variable
         self.s_mbk_d_vars = { i:k for i,j,k,*rest in self.d_mbk['SEND_MBK_DEF']}    # Diccionario con las variables a usar
 
@@ -272,16 +276,22 @@ class MEMBLOCK:
         '''
         # El CRC debe ser correcto
         if not self.payload_crc_valid(payload):
+            log(module=__name__, function='convert_bytes2dict', level='ERROR', msg='MBK_CRC_ERROR')
             return None
 
         # EL payload debe tener largo para ser decodificado de acuerdo al memblock def.
         if len(payload) < self.d_mbk['RCVD_MBK_LENGTH']:
+            log(module=__name__, function='convert_bytes2dict', level='ERROR', msg='MBK_RCVD_LENGTH_ERROR')
             return None
 
         # Calculo los componentes del memblock
         self.process_mbk(force=True)
         # Desempaco el payload y relleno en c/variable
-        mem_block = self.r_mbk_ntuple._make(unpack_from(self.r_mbk_sformat, payload))
+        try:
+            mem_block = self.r_mbk_ntuple._make(unpack_from(self.r_mbk_sformat, payload))
+        except:
+            log(module=__name__, function='convert_bytes2dict', level='ERROR', msg='ERROR !!!: r_mbk_sformat={0}'.format(self.r_mbk_sformat))
+            return None
         # La transformo en un diccionario.
         d_vars = mem_block._asdict()
         return d_vars

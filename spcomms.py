@@ -1,3 +1,4 @@
+#!/opt/anaconda3/envs/mlearn/bin/python3
 #!/usr/bin/python3 -u
 #
 
@@ -15,6 +16,10 @@ ID:PABLO;TYPE:SPX;VER:4.0.4a;PA:3.21;PB:1.34;H:4.56;bt:10.11
 #
 Para activar el debug selectivo, en el server de REDIS 192.168.0.6 hay que dar un comando del tipo:
 hset 'SPCOMMS' 'DEBUG_DLGID' 'PLCTEST'
+----------------------------------------------------------------------------------------------------
+Version 1.3.1 @ 2023-01-31:
+- Agrego el campo TIMESTAMP para los PLC
+
 ----------------------------------------------------------------------------------------------------
 Version 1.3.0 @ 2023-01-10:
 - Funciones para procesar datos de los PLCR2.
@@ -113,8 +118,7 @@ import sys
 from FUNCAUX.UTILS.spc_log import *
 from FUNCAUX.UTILS import spc_stats as stats
 
-
-version = '1.2.5 @ 2022-12-26'
+version = '1.3.1 @ 2023-01-31'
 # -----------------------------------------------------------------------------
 
 
