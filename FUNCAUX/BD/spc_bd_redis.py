@@ -539,10 +539,17 @@ class BD_REDIS:
             stats.inc_count_errors()
             return None
 
+        # 2023-02-02.
+        # Veo si la informacion es actualizada
+        dconf = self.check_config_valid(dlgid)
+        if dconf is False:
+            return None
+
         # Si no hay registro ( HASH) del datalogger lo creo.
         if not self.handle.exists(dlgid):
             self.init_sysvars_record(dlgid)
             return None
+
 
         if not self.handle.hexists(dlgid, 'REMVARS'):
             self.init_sysvars_record(dlgid)
@@ -613,6 +620,12 @@ class BD_REDIS:
             stats.inc_count_errors()
             return None
 
+        # 2023-02-02.
+        # Veo si la informacion es actualizada
+        dconf = self.check_config_valid(dlgid)
+        if dconf is False:
+            return None
+            
         # Si no hay registro ( HASH) del datalogger lo creo.
         if not self.handle.exists(dlgid):
             self.init_sysvars_record(dlgid)

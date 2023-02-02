@@ -47,7 +47,7 @@ from FUNCAUX.FRAMES.spc_framesBase import BASE_frame
 from FUNCAUX.UTILS.spc_log import log
 from FUNCAUX.BD.spc_bd_redis import BD_REDIS
 from FUNCAUX.BD.spc_bd_gda import BD_GDA
-from FUNCAUX.UTILS.spc_utils import u_hash
+from FUNCAUX.UTILS.spc_utils import u_hash, version2int
 
 # ------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ class SPXR2_FRAME(BASE_frame):
         Procesamiento del frame tipo SPX en todas las CLASES ( Overload )
         '''
         self.dlgid = self.d.get('ID', '00000')
-        self.version = self.d.get('VER', 'R0.0.0')
+        self.version = self.d.get('VER', '0.0.0')
         self.dict_payload = { k:v for (k, v) in [x.split(':') for x in self.d['PAYLOAD'].split(';') if ':' in x ] }
 
         #log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg='DEBUG SPXR2_frame')
@@ -140,6 +140,8 @@ class SPXR2_FRAME(BASE_frame):
             response = 'CLASS:CONF_BASE;CONFIG:ERROR'
             return response
         #
+        fw_version = version2int(self.version)
+
         # Primero actualizo el UID en la redis y en GDA
         uid = self.dict_payload.get('UID',None)
         redis_handle.update_uid(self.dlgid, uid)
@@ -153,7 +155,6 @@ class SPXR2_FRAME(BASE_frame):
         pwr_modo = int(dconf.get(('BASE', 'PWRS_MODO'),'0'))
         pwr_hhmm_on = int(dconf.get(('BASE', 'PWRS_HHMM1'),'601'))
         pwr_hhmm_off = int(dconf.get(('BASE', 'PWRS_HHMM2'),'2201'))
-        #
         xhash = 0
         hash_str = f'[TIMERPOLL:{timerpoll:03}]'
         xhash = u_hash(xhash, hash_str)
@@ -171,6 +172,17 @@ class SPXR2_FRAME(BASE_frame):
         xhash = u_hash(xhash, hash_str)
         # log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg=f'DEBUG: HASH_BASE: hash_str=<{hash_str}>, hash={xhash}')
         #
+        # A partir de la version 105 incorporamos 'samples'y almlevel'
+        if fw_version >= 105:
+            samples = int(dconf.get(('BASE', 'SAMPLES'),'1'))
+            almlevel = int(dconf.get(('BASE', 'ALMLEVEL'),'0'))
+            hash_str = f'[SAMPLES:{samples:02}]'
+            xhash = u_hash(xhash, hash_str)
+            # log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg=f'DEBUG: HASH_BASE: hash_str=<{hash_str}>, hash={xhash}')
+            hash_str = f'[ALMLEVEL:{almlevel:02}]'
+            xhash = u_hash(xhash, hash_str)
+            # log(module=__name__, function='process', level='ERROR', dlgid=self.dlgid, msg=f'DEBUG: HASH_BASE: hash_str=<{hash_str}>, hash={xhash}')
+        #
         bd_hash = xhash
         log(module=__name__, function='process', level='SELECT', dlgid=self.dlgid, msg=f'BASE: dlg_hash={dlg_hash}, bd_hash={bd_hash}')
         if dlg_hash == bd_hash:
@@ -184,6 +196,9 @@ class SPXR2_FRAME(BASE_frame):
             else:
                 s_pwrmodo = 'MIXTO'
             response = f'CLASS:CONF_BASE;TPOLL:{timerpoll};TDIAL:{timerdial};PWRMODO:{s_pwrmodo};PWRON:{pwr_hhmm_on:04};PWROFF:{pwr_hhmm_off:04}'
+            if fw_version >= 105:
+                response += f';SAMPLES:{samples};ALMLEVEL:{almlevel};'
+        #        
         return response
 
     def process_frame_config_ainputs(self):

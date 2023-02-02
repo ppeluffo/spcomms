@@ -9,6 +9,15 @@ Funciones de uso general.
 import redis
 from FUNCAUX.UTILS.spc_config import Config
 from FUNCAUX.UTILS.spc_log import log
+import re
+
+
+def version2int (str_version):
+    '''
+    VER tiene un formato tipo A.B.C.
+    Lo convertimos a un numero A*100 + B*10 + C
+    '''
+    return int(re.sub(r"[A-Z,a-z,.]",'',str_version))
 
 
 def u_hash_old(line):
