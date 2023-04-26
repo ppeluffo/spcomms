@@ -1,1 +1,10 @@
 *.pyc
+venv
+test_001.py
+test_non_printable.py
+test_request.py
+test_spcomms.py
+.vscode/
+FUNCAUX/TMP/*
+wsgi*.py
+
